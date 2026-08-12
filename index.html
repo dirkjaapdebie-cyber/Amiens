@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🚶 Wandelingen · Amiens · Abbeville · Azincourt · Arras</title>
+    <title>🚶 Historische wandelingen · 4 steden · 4 thema's</title>
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -314,6 +314,9 @@
         .popup-sub.woi {
             background: #5f6b7a;
         }
+        .popup-sub.revolutie {
+            background: #8e44ad;
+        }
         .popup-sub.groep {
             background: #2c5a47;
         }
@@ -340,7 +343,7 @@
             border-radius: 30px;
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
             font-size: 11px;
-            border-left: 6px solid #2c5a47;
+            border-left: 6px solid #8e44ad;
             color: #1d2f28;
             font-weight: 500;
             display: flex;
@@ -362,6 +365,9 @@
         }
         .legende-badge .dot.woi {
             background: #5f6b7a;
+        }
+        .legende-badge .dot.revolutie {
+            background: #8e44ad;
         }
         .legende-badge .dot.groep {
             background: #2c5a47;
@@ -488,6 +494,7 @@
         <span><span class="dot romeins"></span> Romeins</span>
         <span><span class="dot honderd"></span> 100-jarig</span>
         <span><span class="dot woi"></span> WO I</span>
+        <span><span class="dot revolutie"></span> Revolutie</span>
         <span><span class="dot groep"></span> Groepscache</span>
     </div>
 
@@ -524,12 +531,12 @@
         let userCircle = null;
         let huidigeLatLng = null;
         let map = null;
-        let routeLayer = L.layerGroup().addTo(map); // wordt later toegevoegd als map bestaat
+        let routeLayer = null;
         let huidigeStad = 'amiens';
         const GEOFENCE_STRAAL = 40;
 
         // ================================================================
-        // WANDELINGEN PER STAD
+        // WANDELINGEN PER STAD – nu met vierde thema: revolutie
         // ================================================================
         const steden = {
             amiens: {
@@ -573,6 +580,19 @@
                                 text: "Deze brug over de Somme was een strategisch doelwit in 1918. Australische genietruppen herstelden de brug onder vuur." },
                             { id: "a_w3", coords: [49.8880, 2.2890], title: "🪦 Cimetière St.-Acheul",
                                 text: "Op deze begraafplaats rusten meer dan 600 Commonwealth-soldaten die vielen in de Slag om Amiens (augustus 1918)." }
+                        ]
+                    },
+                    revolutie: {
+                        naam: "Franse Revolutie",
+                        kleur: "#8e44ad",
+                        subClass: "revolutie",
+                        stops: [
+                            { id: "a_v1", coords: [49.8940, 2.2970], title: "🏛️ Hôtel de Ville (Revolutionair)",
+                                text: "Hier vonden in 1789 volksvergaderingen plaats en werd de 'Fête de la Fédération' gevierd." },
+                            { id: "a_v2", coords: [49.8955, 2.3025], title: "⛪ Kathedraal als Tempel van de Rede",
+                                text: "De kathedraal werd in 1793 omgevormd tot een 'Tempel van de Rede', een symbool van de ontkerstening." },
+                            { id: "a_v3", coords: [49.8925, 2.2990], title: "📜 Marktplein van de Revolutie",
+                                text: "Op dit plein werden revolutionaire proclamaties voorgelezen en vonden patriottische bijeenkomsten plaats." }
                         ]
                     }
                 }
@@ -619,6 +639,19 @@
                             { id: "b_w3", coords: [50.1025, 1.8350], title: "🏥 Veldhospitaal",
                                 text: "Locatie van een noodhospitaal waar duizenden gewonden werden behandeld." }
                         ]
+                    },
+                    revolutie: {
+                        naam: "Franse Revolutie",
+                        kleur: "#8e44ad",
+                        subClass: "revolutie",
+                        stops: [
+                            { id: "b_v1", coords: [50.1055, 1.8340], title: "🏛️ Oude stadhuis",
+                                text: "Hier kwam de revolutionaire gemeenteraad bijeen en werden de eerste maatregelen tegen de adel genomen." },
+                            { id: "b_v2", coords: [50.1040, 1.8365], title: "⛪ Kerk omgevormd tot tempel",
+                                text: "De Sint-Vulframuskerk werd in 1794 omgedoopt tot 'Tempel van de Rede' en ontdaan van religieuze symbolen." },
+                            { id: "b_v3", coords: [50.1035, 1.8335], title: "🪓 Marktplein van de guillotine",
+                                text: "Op dit plein stond tijdens de Terreur de guillotine opgesteld – tientallen 'tegenstanders' vonden hier de dood." }
+                        ]
                     }
                 }
             },
@@ -663,6 +696,19 @@
                                 text: "Hier rusten meer dan 200 Commonwealth-soldaten die vielen in de Slag aan de Somme." },
                             { id: "c_w3", coords: [50.4605, 2.1285], title: "🏥 Veldhospitaal",
                                 text: "Een noodhospitaal waar duizenden gewonde soldaten werden behandeld." }
+                        ]
+                    },
+                    revolutie: {
+                        naam: "Franse Revolutie",
+                        kleur: "#8e44ad",
+                        subClass: "revolutie",
+                        stops: [
+                            { id: "c_v1", coords: [50.4635, 2.1285], title: "🏛️ Gemeentehuis",
+                                text: "Het lokale bestuur werd in 1789 vervangen door een revolutionaire raad die de 'Rechten van de Mens' afkondigde." },
+                            { id: "c_v2", coords: [50.4620, 2.1300], title: "⛪ Dorpskerk als volkstempel",
+                                text: "De kerk werd gesloten en gebruikt als opslagplaats, later heringewijd als 'Tempel van de Rede'." },
+                            { id: "c_v3", coords: [50.4615, 2.1280], title: "📜 Vrijheidsboom",
+                                text: "Op het centrale plein werd een vrijheidsboom geplant als symbool van de nieuwe republiek." }
                         ]
                     }
                 }
@@ -709,6 +755,19 @@
                             { id: "d_w3", coords: [50.2860, 2.7720], title: "🪦 Oorlogsbegraafplaats",
                                 text: "Hier rusten duizenden soldaten uit het Gemenebest die vielen in de Slag bij Arras." }
                         ]
+                    },
+                    revolutie: {
+                        naam: "Franse Revolutie – Robespierre",
+                        kleur: "#8e44ad",
+                        subClass: "revolutie",
+                        stops: [
+                            { id: "d_v1", coords: [50.2922, 2.7775], title: "🏠 Huis van Robespierre",
+                                text: "Geboortehuis van Maximilien de Robespierre (1758). Hier groeide de latere leider van de Franse Revolutie op." },
+                            { id: "d_v2", coords: [50.2915, 2.7765], title: "📜 Het revolutionaire stadhuis",
+                                text: "Vanaf dit balkon sprak Robespierre tot de menigte en werden revolutionaire decreten afgekondigd." },
+                            { id: "d_v3", coords: [50.2895, 2.7780], title: "⚖️ Gerechtshof – Tribunal",
+                                text: "Hier vonden tijdens de Terreur de processen plaats tegen 'tegenstanders van de revolutie'." }
+                        ]
                     }
                 }
             }
@@ -719,20 +778,16 @@
         // ================================================================
         function initKaart() {
             if (map) return;
-            map = L.map('map').setView([50.1050, 1.8350], 14);
+            map = L.map('map').setView([49.8945, 2.2990], 14);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; OpenStreetMap, CartoDB',
                 subdomains: 'abcd',
                 maxZoom: 19
             }).addTo(map);
 
-            // Layer voor routes
             routeLayer = L.layerGroup().addTo(map);
-
-            // Toon standaard stad
             wisselStad('amiens');
 
-            // GPS volgen
             map.on('locationfound', onLocationFound);
             map.locate({ setView: false, watch: true, enableHighAccuracy: true });
         }
@@ -746,18 +801,13 @@
             const stad = steden[stadId];
             if (!stad) return;
 
-            // Verwijder oude route-lagen
             routeLayer.clearLayers();
-
-            // Centreer kaart
             map.setView(stad.center, stad.zoom);
 
-            // Voeg routes toe
             Object.keys(stad.routes).forEach(key => {
                 const route = stad.routes[key];
                 const punten = route.stops.map(s => s.coords);
 
-                // Lijn
                 const lijn = L.polyline(punten, {
                     color: route.kleur,
                     weight: 5,
@@ -766,7 +816,6 @@
                 }).bindPopup(`<b>${route.naam}</b> — ${route.stops.length} stopplaatsen`);
                 routeLayer.addLayer(lijn);
 
-                // Markers
                 route.stops.forEach(stop => {
                     const icon = L.divIcon({
                         html: `<div style="background:${route.kleur}; width:20px; height:20px; border-radius:50% 50% 50% 0; transform:rotate(-10deg); border:2px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.25);"></div>`,
@@ -786,6 +835,8 @@
                     routeLayer.addLayer(marker);
                 });
             });
+
+            document.getElementById('stadSelector').value = stadId;
         }
 
         // ================================================================
@@ -839,7 +890,7 @@
         }
 
         // ================================================================
-        // FIREBASE: GROEPS CACHES (zelfde als voorheen)
+        // FIREBASE: GROEPS CACHES (identiek)
         // ================================================================
         function voegGroepsCacheToe() {
             const lat = parseFloat(document.getElementById('latInput').value.trim());
@@ -883,9 +934,6 @@
             });
         }
 
-        // ================================================================
-        // FIREBASE: ONLINE GEBRUIKERS
-        // ================================================================
         function updateOnlineGebruikers() {
             const ref = database.ref('online');
             ref.on('value', snap => {
@@ -904,9 +952,6 @@
             });
         }
 
-        // ================================================================
-        // FIREBASE: GROEPS CACHES LUISTEREN
-        // ================================================================
         function luisterNaarGroepsCaches() {
             const ref = database.ref('groepscaches');
             ref.on('value', snap => {
