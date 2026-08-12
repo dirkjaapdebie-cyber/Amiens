@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallo-Romeinse Fietstour Amiens</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        .popup-container {
+            max-width: 240px;
+            text-align: center;
+        }
+        .popup-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 4px 0;
+            color: #1b4d3e;
+        }
+        .popup-text {
+            font-size: 12px;
+            color: #555;
+            text-align: justify;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .audio-btn {
+            background-color: #1b4d3e;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+        .locate-btn {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(0,0,0,0.4);
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+    <button class="locate-btn" onclick="centreerOpLocatie()" title="Centreer op mijn locatie">🚴</button>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        const map = L.map('map').setView([49.8945, 2.2990], 14);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        function speelAudio(tekst) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(tekst);
+            utterance.lang = 'nl-NL';
+            utterance.pitch = 1.0;
+            utterance.rate = 1.0; // Normale snelheid voor tijdens het fietsen
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Stops aangepast voor een logische fietsroute
+        const stops = [
+            {
+                id: "forum",
+                coords: [49.8942, 2.3006],
+                title: "1. Het Forum & Amfitheater",
+                text: "Onder de Rue des Trois Cailloux liggen de massieve fundamenten van het grote Romeinse amfitheater van Samarobriva uit de 1e eeuw.",
+                audio: "Welkom bij startlocatie één. Je fietst hier over de resten van het Romeinse forum en amfitheater. Stap gerust even af bij de glazen kijkplaten in de straat.",
+                heeftAfgespeeld: false
+            },
+            {
+                id: "museum",
+                coords: [49.8913, 2.2965],
+                title: "2. Musée de Picardie",
+                text: "Dé schatkamer van de regio met fabelachtig goed bewaarde Gallo-Romeinse mozaïeken, antieke glasvondsten en votiefaltaren.",
+                audio: "Stop twee, het Musée de Picardie. Parkeer je fiets hier voor een bezoek aan de indrukwekkende archeologische kelder vol Romeinse mozaïeken.",
+                heeftAfgespeeld: false
+            },
+            {
+                id: "park",
+                coords: [49.8992, 2.3085],
+                title: "3. Park Saint-Pierre & De Somme",
+                text: "Dit uitgestrekte park ligt aan de rivier de Somme. In de oudheid was dit de levensader voor Romeinse vrachtschepen en handelswaar.",
+                audio: "Je fietst nu langs de Somme in Park Saint Pierre. Dit water was de snelweg van de Romeinen. Hier kwamen platte houten vrachtschepen vol graan en aardewerk de stad binnen varen.",
+                heeftAfgespeeld: false
+            },
+            {
+                id: "muur",
+                coords: [49.8948, 2.3019],
+                title: "4. De Romeinse Stadsmuur",
+                text: "De machtige gotische kathedraal herbergt in haar fundamenten en muren grote zandstenen die zijn hergebruikt uit de 3e-eeuwse Romeinse stadsmuur.",
+                audio: "Eindpunt van de fietstocht bij de kathedraal. De middeleeuwse bouwers hebben hier dankbaar gebruikgemaakt van de dikke Romeinse stenen die hier lagen om de fundering te verstevigen.",
+                heeftAfgespeeld: false
+            }
+        ];
+
+        const markerObjecten = {};
+
+        stops.forEach(stop => {
+            const popupContent = `
+                <div class="popup-container">
+                    <div class="popup-title">${stop.title}</div>
+                    <p class="popup-text">${stop.text}</p>
+                    <button class="audio-btn" onclick="speelAudio('${stop.audio}')">🎵 Luister Opnieuw</button>
+                </div>
+            `;
+            
+            const marker = L.marker(stop.coords).addTo(map).bindPopup(popupContent);
+            markerObjecten[stop.id] = marker;
+        });
+
+        // Fietsvriendelijk tracé langs de Somme-oevers
+        L.polyline([
+            stops.coords, // Forum
+            stops.coords, // Museum
+            [49.8955, 2.2960], // Naar het noorden richting de rivier
+            [49.8980, 2.3010], // Fietsen langs de kade (Quai Bélu)
+            stops.coords, // Park Saint-Pierre
+            [49.8970, 2.3050], // Terug via de historische wijk Saint-Leu
+            stops.coords  // Kathedraal
+        ], {
+            color: '#1b4d3e', // Donkergroen voor een outdoor/fietsvibe
+            weight: 5,
+            opacity: 0.8,
+            dashArray: '5, 10'
+        }).addTo(map);
+
+        let userMarker, userCircle, huidigeLatLng;
+        const GEOFENCE_STRAAL = 40; // Grotere straal (40 meter) omdat je op de fiets sneller bent
+
+        function onLocationFound(e) {
+            huidigeLatLng = e.latlng;
+            const radius = e.accuracy / 2;
+
+            if (userMarker) {
+                userMarker.setLatLng(huidigeLatLng);
+                userCircle.setLatLng(huidigeLatLng).setRadius(radius);
+            } else {
+                const redDotIcon = L.divIcon({
+                    className: 'user-gps-dot',
+                    html: "<div style='background-color:red; width:15px; height:15px; border-radius:50%; border: 2px solid white; box-shadow: 0 0 8px rgba(0,0,0,0.6);'></div>",
+                    iconSize:,
+                    iconAnchor:
+                });
+
+                userMarker = L.marker(huidigeLatLng, { icon: redDotIcon }).addTo(map).bindPopup("Jouw fietspositie");
+                userCircle = L.circle(huidigeLatLng, radius, { color: 'red', fillColor: '#f03', fillOpacity: 0.12 }).addTo(map);
+            }
+
+            stops.forEach(stop => {
+                const stopLatLng = L.latLng(stop.coords);
+                const afstand = huidigeLatLng.distanceTo(stopLatLng);
+
+                if (afstand <= GEOFENCE_STRAAL && !stop.heeftAfgespeeld) {
+                    stop.heeftAfgespeeld = true;
+                    markerObjecten[stop.id].openPopup();
+                    speelAudio(stop.audio);
+                } 
+                else if (afstand > GEOFENCE_STRAAL + 20) {
+                    stop.heeftAfgespeeld = false;
+                }
+            });
+        }
+
+        function onLocationError(e) {
+            console.log("GPS-signaal zoekt verbinding... " + e.message);
+        }
+
+        function centreerOpLocatie() {
+            if (huidigeLatLng) {
+                map.setView(huidigeLatLng, 16);
+            } else {
+                alert("Je GPS-locatie wordt geladen...");
+            }
+        }
+
+        map.on('locationfound', onLocationFound);
+        map.on('locationerror', onLocationError);
+
+        map.locate({ setView: false, watch: true, enableHighAccuracy: true });
+    </script>
+</body>
+</html>
