@@ -343,7 +343,7 @@
         };
 
         // ================================================================
-        // STEDEN DATABASE (met Rouen, Reims en MTB toegevoegd)
+        // STEDEN DATABASE (alle routes nu als rondjes)
         // ================================================================
         function laadStandaardSteden() {
             steden = {
@@ -352,7 +352,7 @@
                     zoom: 14,
                     routes: {
                         romeins: {
-                            naam: "Romeins Amiens",
+                            naam: "Romeins Amiens (rondje)",
                             kleur: "#1d6b4c",
                             subClass: "romeins",
                             stops: [
@@ -361,11 +361,13 @@
                                 { id: "a_r2", coords: [49.8913, 2.2965], title: "🏺 Musée de Picardie",
                                     text: "Dé schatkamer met fabelachtig bewaarde mozaïeken, antieke glasvondsten en votiefaltaren." },
                                 { id: "a_r3", coords: [49.8992, 2.3085], title: "🌿 Park Saint-Pierre",
-                                    text: "Aan de Somme. In de oudheid was dit de levensader voor Romeinse vrachtschepen vol graan en aardewerk." }
+                                    text: "Aan de Somme. In de oudheid was dit de levensader voor Romeinse vrachtschepen vol graan en aardewerk." },
+                                // Sluit de lus: terug naar startpunt
+                                { id: "a_r4", coords: [49.8942, 2.3006], title: "🏛️ Terug bij Forum", text: "Rondje voltooid!" }
                             ]
                         },
                         honderd: {
-                            naam: "100-jarige oorlog",
+                            naam: "100-jarige oorlog (rondje)",
                             kleur: "#b34b2e",
                             subClass: "honderd",
                             stops: [
@@ -374,11 +376,12 @@
                                 { id: "a_h2", coords: [49.8970, 2.3040], title: "⚔️ Saint-Leu",
                                     text: "Deze schilderachtige wijk was decor van schermutselingen tijdens de Honderdjarige Oorlog. De Engelsen en Bourgondiërs vochten hier om de controle over de Somme." },
                                 { id: "a_h3", coords: [49.8950, 2.3030], title: "🏰 Oude stadspoort",
-                                    text: "Deze poort was onderdeel van de middeleeuwse verdedigingswerken en werd meermaals belegerd." }
+                                    text: "Deze poort was onderdeel van de middeleeuwse verdedigingswerken en werd meermaals belegerd." },
+                                { id: "a_h4", coords: [49.8948, 2.3019], title: "⛪ Terug bij Kathedraal", text: "Rondje voltooid!" }
                             ]
                         },
                         woi: {
-                            naam: "Eerste Wereldoorlog",
+                            naam: "Eerste Wereldoorlog (rondje)",
                             kleur: "#5f6b7a",
                             subClass: "woi",
                             stops: [
@@ -387,11 +390,12 @@
                                 { id: "a_w2", coords: [49.8960, 2.3000], title: "🌉 Pont de la Porte",
                                     text: "Deze brug over de Somme was een strategisch doelwit in 1918. Australische genietruppen herstelden de brug onder vuur." },
                                 { id: "a_w3", coords: [49.8880, 2.2890], title: "🪦 Cimetière St.-Acheul",
-                                    text: "Op deze begraafplaats rusten meer dan 600 Commonwealth-soldaten die vielen in de Slag om Amiens (augustus 1918)." }
+                                    text: "Op deze begraafplaats rusten meer dan 600 Commonwealth-soldaten die vielen in de Slag om Amiens (augustus 1918)." },
+                                { id: "a_w4", coords: [49.8922, 2.2955], title: "🏨 Terug bij Hôtel de Ville", text: "Rondje voltooid!" }
                             ]
                         },
                         revolutie: {
-                            naam: "Franse Revolutie",
+                            naam: "Franse Revolutie (rondje)",
                             kleur: "#8e44ad",
                             subClass: "revolutie",
                             stops: [
@@ -400,20 +404,23 @@
                                 { id: "a_v2", coords: [49.8955, 2.3025], title: "⛪ Kathedraal als Tempel van de Rede",
                                     text: "De kathedraal werd in 1793 omgevormd tot een 'Tempel van de Rede', een symbool van de ontkerstening." },
                                 { id: "a_v3", coords: [49.8925, 2.2990], title: "📜 Marktplein van de Revolutie",
-                                    text: "Op dit plein werden revolutionaire proclamaties voorgelezen en vonden patriottische bijeenkomsten plaats." }
+                                    text: "Op dit plein werden revolutionaire proclamaties voorgelezen en vonden patriottische bijeenkomsten plaats." },
+                                { id: "a_v4", coords: [49.8940, 2.2970], title: "🏛️ Terug bij Hôtel de Ville", text: "Rondje voltooid!" }
                             ]
                         },
                         mtb: {
-                            naam: "Mountainbike trails",
+                            naam: "MTB Forêt de Blangy (rondje)",
                             kleur: "#e67e22",
                             subClass: "mtb",
                             stops: [
-                                { id: "a_m1", coords: [49.9200, 2.2300], title: "🚵 Forêt de Blangy",
-                                    text: "Technische singletrack door het bos, met wortels, heuvels en een paar spannende afdalingen." },
-                                { id: "a_m2", coords: [49.8700, 2.3300], title: "🚵 Forêt de Boves",
-                                    text: "Glooiende paden, snelle bochten en een paar steile klimmetjes – ideaal voor gevorderden." },
-                                { id: "a_m3", coords: [49.8900, 2.2800], title: "🚵 Vallée de la Somme",
-                                    text: "Paden langs de rivier, vlak en snel met mooie uitzichten – geschikt voor beginners." }
+                                { id: "a_m1", coords: [49.9200, 2.2300], title: "🚵 Start Forêt de Blangy",
+                                    text: "Startpunt van de technische singletrack door het bos, met wortels, heuvels en een paar spannende afdalingen." },
+                                { id: "a_m2", coords: [49.9250, 2.2350], title: "🚵 Afdaling 1",
+                                    text: "Snelle afdaling met bochten en een paar sprongen." },
+                                { id: "a_m3", coords: [49.9150, 2.2250], title: "🚵 Klim",
+                                    text: "Steile klim door het bos, met wortels en stenen." },
+                                { id: "a_m4", coords: [49.9200, 2.2300], title: "🚵 Terug bij start",
+                                    text: "Rondje voltooid! Tijd voor een pauze." }
                             ]
                         }
                     }
@@ -423,7 +430,7 @@
                     zoom: 14,
                     routes: {
                         romeins: {
-                            naam: "Romeins Abbeville",
+                            naam: "Romeins Abbeville (rondje)",
                             kleur: "#1d6b4c",
                             subClass: "romeins",
                             stops: [
@@ -432,11 +439,12 @@
                                 { id: "b_r2", coords: [50.1055, 1.8355], title: "🏺 Gallo-Romeinse villa",
                                     text: "Opgravingen tonen een luxueuze villa met mozaïekvloeren uit de 2e eeuw." },
                                 { id: "b_r3", coords: [50.1030, 1.8370], title: "🌾 Romeinse graanopslag",
-                                    text: "Fundamenten van een groot graanpakhuis aan de oude Somme-arm." }
+                                    text: "Fundamenten van een groot graanpakhuis aan de oude Somme-arm." },
+                                { id: "b_r4", coords: [50.1070, 1.8330], title: "🏛️ Terug bij Romeinse weg", text: "Rondje voltooid!" }
                             ]
                         },
                         honderd: {
-                            naam: "100-jarige oorlog",
+                            naam: "100-jarige oorlog (rondje)",
                             kleur: "#b34b2e",
                             subClass: "honderd",
                             stops: [
@@ -445,758 +453,4 @@
                                 { id: "b_h2", coords: [50.1045, 1.8360], title: "🏰 Kasteel van Abbeville",
                                     text: "Het middeleeuwse kasteel was een strategisch bolwerk in de Honderdjarige Oorlog." },
                                 { id: "b_h3", coords: [50.1020, 1.8345], title: "⛪ Sint-Vulframuskerk",
-                                    text: "Deze kerk werd in 1430 gebruikt als vergaderplaats door de Bourgondiërs." }
-                            ]
-                        },
-                        woi: {
-                            naam: "Eerste Wereldoorlog",
-                            kleur: "#5f6b7a",
-                            subClass: "woi",
-                            stops: [
-                                { id: "b_w1", coords: [50.1065, 1.8340], title: "🏨 Brits hoofdkwartier",
-                                    text: "Dit gebouw diende in 1918 als commandopost voor de Britse troepen." },
-                                { id: "b_w2", coords: [50.1040, 1.8375], title: "🪦 Oorlogsbegraafplaats",
-                                    text: "Hier rusten 120 Commonwealth-soldaten die vielen in de Slag om de Somme (1916)." },
-                                { id: "b_w3", coords: [50.1025, 1.8350], title: "🏥 Veldhospitaal",
-                                    text: "Locatie van een noodhospitaal waar duizenden gewonden werden behandeld." }
-                            ]
-                        },
-                        revolutie: {
-                            naam: "Franse Revolutie",
-                            kleur: "#8e44ad",
-                            subClass: "revolutie",
-                            stops: [
-                                { id: "b_v1", coords: [50.1055, 1.8340], title: "🏛️ Oude stadhuis",
-                                    text: "Hier kwam de revolutionaire gemeenteraad bijeen en werden de eerste maatregelen tegen de adel genomen." },
-                                { id: "b_v2", coords: [50.1040, 1.8365], title: "⛪ Kerk omgevormd tot tempel",
-                                    text: "De Sint-Vulframuskerk werd in 1794 omgedoopt tot 'Tempel van de Rede' en ontdaan van religieuze symbolen." },
-                                { id: "b_v3", coords: [50.1035, 1.8335], title: "🪓 Marktplein van de guillotine",
-                                    text: "Op dit plein stond tijdens de Terreur de guillotine opgesteld – tientallen 'tegenstanders' vonden hier de dood." }
-                            ]
-                        },
-                        mtb: {
-                            naam: "Mountainbike trails",
-                            kleur: "#e67e22",
-                            subClass: "mtb",
-                            stops: [
-                                { id: "b_m1", coords: [50.1500, 1.7200], title: "🚵 Forêt de Crécy",
-                                    text: "Uitgestrekte bossen met lange singletrack, afdalingen en technische passages." },
-                                { id: "b_m2", coords: [50.1300, 1.8100], title: "🚵 Vallée de la Maye",
-                                    text: "Paden door heuvelachtig terrein, met korte klimmen en snelle afdalingen." },
-                                { id: "b_m3", coords: [50.1700, 1.9000], title: "🚵 Forêt de Ponthieu",
-                                    text: "Rustige paden door het bos, geschikt voor zowel beginners als gevorderden." }
-                            ]
-                        }
-                    }
-                },
-                azincourt: {
-                    center: [50.4630, 2.1290],
-                    zoom: 14,
-                    routes: {
-                        romeins: {
-                            naam: "Romeins Azincourt",
-                            kleur: "#1d6b4c",
-                            subClass: "romeins",
-                            stops: [
-                                { id: "c_r1", coords: [50.4645, 2.1280], title: "🏛️ Romeinse weg",
-                                    text: "Restanten van de Romeinse weg die Boulogne-sur-Mer met Bavay verbond." },
-                                { id: "c_r2", coords: [50.4635, 2.1305], title: "🏺 Gallo-Romeinse nederzetting",
-                                    text: "Archeologische vondsten wijzen op een kleine agrarische nederzetting uit de 2e eeuw." },
-                                { id: "c_r3", coords: [50.4615, 2.1310], title: "🌾 Romeinse akkers",
-                                    text: "Sporen van Romeinse akkerbouw en graanopslag in dit vruchtbare gebied." }
-                            ]
-                        },
-                        honderd: {
-                            naam: "100-jarige oorlog (1415)",
-                            kleur: "#b34b2e",
-                            subClass: "honderd",
-                            stops: [
-                                { id: "c_h1", coords: [50.4640, 2.1270], title: "🏹 Het slagveld",
-                                    text: "Op 25 oktober 1415 versloeg een klein Engels leger onder Hendrik V een veel groter Frans leger." },
-                                { id: "c_h2", coords: [50.4625, 2.1295], title: "⚔️ Het Engelse kamp",
-                                    text: "De Engelse boogschutters hadden hier hun positie ingenomen, beschut door het bos." },
-                                { id: "c_h3", coords: [50.4610, 2.1300], title: "🪦 Massagraf",
-                                    text: "Hier werden duizenden Franse ridders en soldaten begraven na de Slag." }
-                            ]
-                        },
-                        woi: {
-                            naam: "Eerste Wereldoorlog",
-                            kleur: "#5f6b7a",
-                            subClass: "woi",
-                            stops: [
-                                { id: "c_w1", coords: [50.4650, 2.1260], title: "🏨 Brits hoofdkwartier",
-                                    text: "Tijdens de Slag aan de Somme (1916) was dit een Brits commandopost." },
-                                { id: "c_w2", coords: [50.4630, 2.1315], title: "🪦 Oorlogsbegraafplaats",
-                                    text: "Hier rusten meer dan 200 Commonwealth-soldaten die vielen in de Slag aan de Somme." },
-                                { id: "c_w3", coords: [50.4605, 2.1285], title: "🏥 Veldhospitaal",
-                                    text: "Een noodhospitaal waar duizenden gewonde soldaten werden behandeld." }
-                            ]
-                        },
-                        revolutie: {
-                            naam: "Franse Revolutie",
-                            kleur: "#8e44ad",
-                            subClass: "revolutie",
-                            stops: [
-                                { id: "c_v1", coords: [50.4635, 2.1285], title: "🏛️ Gemeentehuis",
-                                    text: "Het lokale bestuur werd in 1789 vervangen door een revolutionaire raad die de 'Rechten van de Mens' afkondigde." },
-                                { id: "c_v2", coords: [50.4620, 2.1300], title: "⛪ Dorpskerk als volkstempel",
-                                    text: "De kerk werd gesloten en gebruikt als opslagplaats, later heringewijd als 'Tempel van de Rede'." },
-                                { id: "c_v3", coords: [50.4615, 2.1280], title: "📜 Vrijheidsboom",
-                                    text: "Op het centrale plein werd een vrijheidsboom geplant als symbool van de nieuwe republiek." }
-                            ]
-                        }
-                    }
-                },
-                arras: {
-                    center: [50.2910, 2.7770],
-                    zoom: 14,
-                    routes: {
-                        romeins: {
-                            naam: "Romeins Arras (Nemetacum)",
-                            kleur: "#1d6b4c",
-                            subClass: "romeins",
-                            stops: [
-                                { id: "d_r1", coords: [50.2915, 2.7750], title: "🏛️ Romeinse stadsmuur",
-                                    text: "Restanten van de ommuring van de Romeinse stad Nemetacum, daterend uit de 1e eeuw." },
-                                { id: "d_r2", coords: [50.2890, 2.7780], title: "🏺 Forum en thermen",
-                                    text: "Opgravingen tonen de fundamenten van een groot forum en openbare badhuizen." },
-                                { id: "d_r3", coords: [50.2930, 2.7800], title: "🛣️ Romeinse heirbaan",
-                                    text: "De oude weg die Arras met Boulogne en Bavay verbond, nog zichtbaar in het landschap." }
-                            ]
-                        },
-                        honderd: {
-                            naam: "100-jarige oorlog",
-                            kleur: "#b34b2e",
-                            subClass: "honderd",
-                            stops: [
-                                { id: "d_h1", coords: [50.2920, 2.7760], title: "🏛️ Stadhuis (Verdrag van Arras)",
-                                    text: "Hier werd in 1435 het Verdrag van Arras getekend, een keerpunt in de Honderdjarige Oorlog." },
-                                { id: "d_h2", coords: [50.2880, 2.7740], title: "🏰 Middeleeuws kasteel",
-                                    text: "Deze citadel (later herbouwd) was een strategisch bolwerk tijdens de oorlog." },
-                                { id: "d_h3", coords: [50.2910, 2.7770], title: "⛪ Marktplein",
-                                    text: "Het centrale plein waar troepen samenkwamen en proclamaties werden voorgelezen." }
-                            ]
-                        },
-                        woi: {
-                            naam: "Eerste Wereldoorlog",
-                            kleur: "#5f6b7a",
-                            subClass: "woi",
-                            stops: [
-                                { id: "d_w1", coords: [50.2900, 2.7760], title: "🕳️ Tunnelnetwerk (les Boves)",
-                                    text: "Ondergrondse gangen die door de Britten werden gebruikt als schuilkelders en verbindingswegen." },
-                                { id: "d_w2", coords: [50.2950, 2.7800], title: "🏨 Brits hoofdkwartier",
-                                    text: "Vanuit dit gebouw leidden de Britten de Slag bij Arras (1917)." },
-                                { id: "d_w3", coords: [50.2860, 2.7720], title: "🪦 Oorlogsbegraafplaats",
-                                    text: "Hier rusten duizenden soldaten uit het Gemenebest die vielen in de Slag bij Arras." }
-                            ]
-                        },
-                        revolutie: {
-                            naam: "Franse Revolutie – Robespierre",
-                            kleur: "#8e44ad",
-                            subClass: "revolutie",
-                            stops: [
-                                { id: "d_v1", coords: [50.2922, 2.7775], title: "🏠 Huis van Robespierre",
-                                    text: "Geboortehuis van Maximilien de Robespierre (1758). Hier groeide de latere leider van de Franse Revolutie op." },
-                                { id: "d_v2", coords: [50.2915, 2.7765], title: "📜 Het revolutionaire stadhuis",
-                                    text: "Vanaf dit balkon sprak Robespierre tot de menigte en werden revolutionaire decreten afgekondigd." },
-                                { id: "d_v3", coords: [50.2895, 2.7780], title: "⚖️ Gerechtshof – Tribunal",
-                                    text: "Hier vonden tijdens de Terreur de processen plaats tegen 'tegenstanders van de revolutie'." }
-                            ]
-                        }
-                    }
-                },
-                // =================== ROUEN ===================
-                rouen: {
-                    center: [49.4421, 1.1020],
-                    zoom: 14,
-                    routes: {
-                        romeins: {
-                            naam: "Romeins Rouen (Rotomagus)",
-                            kleur: "#1d6b4c",
-                            subClass: "romeins",
-                            stops: [
-                                { id: "r_r1", coords: [49.4400, 1.1000], title: "🏛️ Romeins amfitheater",
-                                    text: "Restanten van het grote amfitheater van Rotomagus, plaats voor 5.000 toeschouwers (2e eeuw)." },
-                                { id: "r_r2", coords: [49.4415, 1.1035], title: "🏺 Romeinse thermen",
-                                    text: "Opgravingen van de openbare badhuizen met hypocaustvloeren en mozaïeken." },
-                                { id: "r_r3", coords: [49.4430, 1.0980], title: "🌉 Romeinse brug en haven",
-                                    text: "Resten van de houten brug en havenfaciliteiten aan de Seine, belangrijk voor handel." }
-                            ]
-                        },
-                        honderd: {
-                            naam: "100-jarige oorlog – Jeanne d'Arc",
-                            kleur: "#b34b2e",
-                            subClass: "honderd",
-                            stops: [
-                                { id: "r_h1", coords: [49.4420, 1.1020], title: "🔥 Place du Vieux-Marché",
-                                    text: "Hier werd Jeanne d'Arc op 30 mei 1431 op de brandstapel gezet. Een kruis en herdenkingskerk markeren de plek." },
-                                { id: "r_h2", coords: [49.4410, 1.1010], title: "🏰 Tour Jeanne d'Arc",
-                                    text: "De toren waar Jeanne tijdens haar proces werd gevangen gehouden. Nu een museum." },
-                                { id: "r_h3", coords: [49.4430, 1.1000], title: "⚔️ Château de Rouen",
-                                    text: "Het kasteel van Rouen, in de 15e eeuw een belangrijk Engels bolwerk." }
-                            ]
-                        },
-                        woi: {
-                            naam: "Eerste Wereldoorlog",
-                            kleur: "#5f6b7a",
-                            subClass: "woi",
-                            stops: [
-                                { id: "r_w1", coords: [49.4450, 1.1040], title: "🏨 Brits militair hospitaal",
-                                    text: "Het voormalige treinstation werd ingericht als groot veldhospitaal voor gewonde soldaten." },
-                                { id: "r_w2", coords: [49.4390, 1.0990], title: "🪦 Britse begraafplaats",
-                                    text: "Cimetière Mont-Gargan, met meer dan 500 Commonwealth-graven uit de Eerste Wereldoorlog." },
-                                { id: "r_w3", coords: [49.4440, 1.1030], title: "🚂 Bevoorradingsdepot",
-                                    text: "Rouen was een cruciale bevoorradingshaven voor het Britse leger aan het front." }
-                            ]
-                        },
-                        revolutie: {
-                            naam: "Franse Revolutie in Rouen",
-                            kleur: "#8e44ad",
-                            subClass: "revolutie",
-                            stops: [
-                                { id: "r_v1", coords: [49.4405, 1.1020], title: "⛪ Kathedraal als Tempel van de Rede",
-                                    text: "De kathedraal werd in 1793 onttakeld en omgedoopt tot 'Tempel van de Rede'." },
-                                { id: "r_v2", coords: [49.4420, 1.1000], title: "🏛️ Revolutionair tribunaal",
-                                    text: "In het voormalige justitiepaleis werden 'tegenstanders' berecht en veroordeeld." },
-                                { id: "r_v3", coords: [49.4410, 1.1030], title: "🗡️ Guillotineplein",
-                                    text: "Op dit plein werden tijdens de Terreur tientallen slachtoffers geëxecuteerd." }
-                            ]
-                        }
-                    }
-                },
-                // =================== REIMS ===================
-                reims: {
-                    center: [49.2580, 4.0310],
-                    zoom: 14,
-                    routes: {
-                        romeins: {
-                            naam: "Romeins Reims (Durocortorum)",
-                            kleur: "#1d6b4c",
-                            subClass: "romeins",
-                            stops: [
-                                { id: "e_r1", coords: [49.2570, 4.0320], title: "🏛️ Porte de Mars",
-                                    text: "Een Romeinse triomfboog uit de 3e eeuw, ooit onderdeel van de stadsmuur." },
-                                { id: "e_r2", coords: [49.2585, 4.0300], title: "🏺 Forum en basilica",
-                                    text: "Opgravingen van het grote forum en de basilica, het hart van de Romeinse stad." },
-                                { id: "e_r3", coords: [49.2590, 4.0330], title: "🛁 Thermen",
-                                    text: "Resten van een groot badhuiscomplex met caldarium, tepidarium en frigidarium." }
-                            ]
-                        },
-                        honderd: {
-                            naam: "100-jarige oorlog – Kroningsstad",
-                            kleur: "#b34b2e",
-                            subClass: "honderd",
-                            stops: [
-                                { id: "e_h1", coords: [49.2538, 4.0330], title: "👑 Kathedraal Notre-Dame",
-                                    text: "Kroningskerk van de Franse koningen. In de Honderdjarige Oorlog werd de stad meermaals belegerd." },
-                                { id: "e_h2", coords: [49.2560, 4.0340], title: "🏰 Porte de Mars (middeleeuws)",
-                                    text: "Deze poort werd in 1359 verdedigd tegen de Engelsen tijdens hun opmars." },
-                                { id: "e_h3", coords: [49.2545, 4.0300], title: "⚔️ Kasteel van Reims",
-                                    text: "Het koninklijk kasteel, waar de koningen verbleven voor hun kroning." }
-                            ]
-                        },
-                        woi: {
-                            naam: "Eerste Wereldoorlog – Verwoesting",
-                            kleur: "#5f6b7a",
-                            subClass: "woi",
-                            stops: [
-                                { id: "e_w1", coords: [49.2538, 4.0330], title: "⛪ Kathedraal beschadigd",
-                                    text: "De kathedraal werd in 1914 zwaar getroffen door Duitse granaten. De steigers zijn nog zichtbaar." },
-                                { id: "e_w2", coords: [49.2560, 4.0300], title: "🕳️ Loopgraven en bunkers",
-                                    text: "In de stad werden loopgraven gegraven; de frontlinie liep vlak langs Reims." },
-                                { id: "e_w3", coords: [49.2500, 4.0280], title: "🪦 Oorlogsbegraafplaats",
-                                    text: "Franse en geallieerde begraafplaats met duizenden slachtoffers van de Slag om de Marne." }
-                            ]
-                        },
-                        revolutie: {
-                            naam: "Franse Revolutie in Reims",
-                            kleur: "#8e44ad",
-                            subClass: "revolutie",
-                            stops: [
-                                { id: "e_v1", coords: [49.2538, 4.0330], title: "⛪ Kathedraal onttakeld",
-                                    text: "In 1793 werd de kathedraal geplunderd, de koningsbeelden vernield en omgedoopt tot 'Tempel van de Rede'." },
-                                { id: "e_v2", coords: [49.2550, 4.0310], title: "🏛️ Club des Jacobins",
-                                    text: "Het voormalige klooster waar de revolutionaire club bijeenkwam en de Terreur organiseerde." },
-                                { id: "e_v3", coords: [49.2540, 4.0300], title: "🗡️ Guillotine op het marktplein",
-                                    text: "Op dit plein werden tijdens de Revolutie tientallen 'vijanden van het volk' geëxecuteerd." }
-                            ]
-                        }
-                    }
-                }
-            };
-        }
-
-        laadStandaardSteden();
-
-        // ================================================================
-        // STAD TOEVOEGEN
-        // ================================================================
-        function toggleStadToevoeg() {
-            document.getElementById('stadToevoegForm').classList.toggle('show');
-        }
-
-        function voegStadToe() {
-            const naam = document.getElementById('stadNaam').value.trim();
-            const lat = parseFloat(document.getElementById('stadLat').value.trim());
-            const lng = parseFloat(document.getElementById('stadLng').value.trim());
-            const zoom = parseInt(document.getElementById('stadZoom').value.trim()) || 14;
-            if (!naam || isNaN(lat) || isNaN(lng)) { alert('Vul een geldige stadsnaam en coördinaten in.'); return; }
-            const key = naam.toLowerCase().replace(/[^a-z0-9]/g, '');
-            if (steden[key]) { alert('Deze stad bestaat al!'); return; }
-            steden[key] = {
-                center: [lat, lng],
-                zoom: zoom,
-                routes: {
-                    romeins: { naam: `Romeins ${naam}`, kleur: "#1d6b4c", subClass: "romeins", stops: [] },
-                    honderd: { naam: `100-jarig ${naam}`, kleur: "#b34b2e", subClass: "honderd", stops: [] },
-                    woi: { naam: `WO I ${naam}`, kleur: "#5f6b7a", subClass: "woi", stops: [] },
-                    revolutie: { naam: `Revolutie ${naam}`, kleur: "#8e44ad", subClass: "revolutie", stops: [] },
-                    mtb: { naam: `MTB ${naam}`, kleur: "#e67e22", subClass: "mtb", stops: [] }
-                }
-            };
-            vulStedenDropdown();
-            document.getElementById('stadSelector').value = key;
-            wisselStad(key);
-            document.getElementById('stadNaam').value = '';
-            document.getElementById('stadLat').value = '';
-            document.getElementById('stadLng').value = '';
-            document.getElementById('stadZoom').value = '14';
-            toggleStadToevoeg();
-            alert(`✅ Stad "${naam}" toegevoegd!`);
-        }
-
-        function vulStedenDropdown() {
-            const selector = document.getElementById('stadSelector');
-            selector.innerHTML = '';
-            Object.keys(steden).forEach(key => {
-                const opt = document.createElement('option');
-                opt.value = key;
-                opt.textContent = key.charAt(0).toUpperCase() + key.slice(1);
-                selector.appendChild(opt);
-            });
-        }
-
-        // ================================================================
-        // COÖRDINATEN PARSER
-        // ================================================================
-        function parseCoords(invoer) {
-            if (!invoer || typeof invoer !== 'string') return null;
-            const s = invoer.trim().toUpperCase();
-            
-            // 1. Probeer decimaal (bijv. "50.0400167, 2.12435" of "50.0400167N 2.12435E")
-            let match = s.match(/^([\d\.\-]+)\s*[,\s]\s*([\d\.\-]+)$/);
-            if (match) {
-                const lat = parseFloat(match[1]);
-                const lng = parseFloat(match[2]);
-                if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-                    return { lat, lng };
-                }
-            }
-
-            // 2. Decimaal met N/S/E/W (bijv. "50.0400167N 2.12435E")
-            match = s.match(/^([\d\.\-]+)\s*([NSEW])\s*[,\s]\s*([\d\.\-]+)\s*([NSEW])$/);
-            if (match) {
-                let lat = parseFloat(match[1]);
-                let lng = parseFloat(match[3]);
-                if (match[2] === 'S') lat = -lat;
-                if (match[4] === 'W') lng = -lng;
-                if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-                    return { lat, lng };
-                }
-            }
-
-            // 3. Graden/minuten (bijv. "N 50° 02.401 E 002° 07.461")
-            match = s.match(/([NSEW])\s*(\d{1,3})[°°\s]+(\d{1,2}(?:\.\d+)?)\s*[,\s]\s*([NSEW])\s*(\d{1,3})[°°\s]+(\d{1,2}(?:\.\d+)?)/);
-            if (match) {
-                let lat = parseFloat(match[2]) + parseFloat(match[3]) / 60;
-                let lng = parseFloat(match[5]) + parseFloat(match[6]) / 60;
-                if (match[1] === 'S') lat = -lat;
-                if (match[4] === 'W') lng = -lng;
-                if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-                    return { lat, lng };
-                }
-            }
-
-            // 4. Graden/minuten zonder N/S/E/W, maar met minteken
-            match = s.match(/^([\d\.\-]+)[°°\s]+([\d\.]+)\s*[,\s]\s*([\d\.\-]+)[°°\s]+([\d\.]+)$/);
-            if (match) {
-                let lat = parseFloat(match[1]) + parseFloat(match[2]) / 60;
-                let lng = parseFloat(match[3]) + parseFloat(match[4]) / 60;
-                if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-                    return { lat, lng };
-                }
-            }
-
-            return null; // ongeldig
-        }
-
-        // ================================================================
-        // KAART INIT
-        // ================================================================
-        function initKaart() {
-            if (map) return;
-            map = L.map('map', { zoomControl: true, fadeAnimation: true, zoomAnimation: true })
-                .setView([49.8945, 2.2990], 14);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap, CartoDB',
-                subdomains: 'abcd', maxZoom: 19, minZoom: 5
-            }).addTo(map);
-            routeLayer = L.layerGroup().addTo(map);
-            vulStedenDropdown();
-            document.getElementById('stadSelector').value = 'amiens';
-            wisselStad('amiens');
-            setTimeout(() => map.invalidateSize(), 100);
-            map.on('locationfound', onLocationFound);
-            map.locate({ setView: false, watch: true, enableHighAccuracy: true });
-        }
-
-        // ================================================================
-        // TEKEN ROUTES
-        // ================================================================
-        function tekenRoutes(stadId) {
-            const stad = steden[stadId];
-            if (!stad) return;
-            routeLayer.clearLayers();
-
-            Object.keys(stad.routes).forEach(key => {
-                const route = stad.routes[key];
-                if (!route.stops || route.stops.length === 0) {
-                    const msg = L.marker(stad.center, {
-                        icon: L.divIcon({
-                            html: `<div style="background:#444; padding:4px 12px; border-radius:20px; color:#fff; font-size:12px;">⏳ ${route.naam} (nog geen stops)</div>`,
-                            iconSize: [0, 0], iconAnchor: [0, 0]
-                        })
-                    }).addTo(routeLayer);
-                    return;
-                }
-
-                const punten = route.stops.map(s => s.coords);
-                const lijnOpties = {
-                    color: route.kleur,
-                    weight: 6,
-                    opacity: 0.9
-                };
-                const themaKey = route.subClass;
-                if (stippelStatus[themaKey]) {
-                    lijnOpties.dashArray = '6, 8';
-                }
-                const lijn = L.polyline(punten, lijnOpties)
-                    .bindPopup(`<b>${route.naam}</b> — ${route.stops.length} stopplaatsen`);
-                routeLayer.addLayer(lijn);
-
-                route.stops.forEach(stop => {
-                    const icon = L.divIcon({
-                        html: `<div style="background:${route.kleur}; width:22px; height:22px; border-radius:50% 50% 50% 0; transform:rotate(-10deg); border:2px solid white; box-shadow:0 2px 10px rgba(0,0,0,0.5);"></div>`,
-                        iconSize: [24, 24], iconAnchor: [12, 12]
-                    });
-                    const marker = L.marker(stop.coords, { icon })
-                        .bindPopup(`
-                            <div class="popup-container">
-                                <div class="popup-title">${stop.title}</div>
-                                <span class="popup-sub ${route.subClass}">${route.naam}</span>
-                                <p class="popup-text">${stop.text}</p>
-                                <button class="audio-btn" onclick="speelAudio('${stop.title} — ${stop.text}')">🔊 Luister</button>
-                            </div>
-                        `);
-                    routeLayer.addLayer(marker);
-                });
-            });
-        }
-
-        // ================================================================
-        // STAD WISSELEN
-        // ================================================================
-        function wisselStad(stadId) {
-            if (!map) return;
-            const stad = steden[stadId];
-            if (!stad) { alert('Stad niet gevonden!'); return; }
-            huidigeStad = stadId;
-            map.setView(stad.center, stad.zoom);
-            tekenRoutes(stadId);
-            document.getElementById('stadSelector').value = stadId;
-        }
-
-        // ================================================================
-        // PER THEMA STIPPEL TOGGLE
-        // ================================================================
-        function setStippel(thema, aan) {
-            stippelStatus[thema] = aan;
-            tekenRoutes(huidigeStad);
-        }
-
-        // ================================================================
-        // AUDIO
-        // ================================================================
-        function speelAudio(tekst) {
-            window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(tekst);
-            u.lang = 'nl-NL'; u.pitch = 1.0; u.rate = 0.9;
-            window.speechSynthesis.speak(u);
-        }
-
-        // ================================================================
-        // GPS
-        // ================================================================
-        function onLocationFound(e) {
-            huidigeLatLng = e.latlng;
-            const radius = e.accuracy / 1.8;
-            if (userMarker) {
-                userMarker.setLatLng(huidigeLatLng);
-                userCircle.setLatLng(huidigeLatLng).setRadius(radius);
-            } else {
-                const wandelIcon = L.divIcon({
-                    html: `<div style="background:#f0d080; width:22px; height:22px; border-radius:50%; border:3px solid white; box-shadow:0 0 0 4px rgba(240,208,128,0.4); display:flex; align-items:center; justify-content:center; font-size:14px;">🚶</div>`,
-                    iconSize: [30, 30], iconAnchor: [15, 15]
-                });
-                userMarker = L.marker(huidigeLatLng, { icon: wandelIcon }).addTo(map);
-                userCircle = L.circle(huidigeLatLng, radius, { color: '#f0d080', fillColor: '#f0d080', fillOpacity: 0.12,
-                    weight: 1.5 }).addTo(map);
-            }
-            if (huidigeGebruiker) {
-                database.ref('online/' + huidigeGebruiker).set({ lat: huidigeLatLng.lat, lng: huidigeLatLng.lng,
-                    timestamp: Date.now() });
-            }
-        }
-
-        function centreerOpLocatie() {
-            if (huidigeLatLng) { map.setView(huidigeLatLng, 16); } else { alert('📍 GPS wordt geladen...'); }
-        }
-
-        // ================================================================
-        // FIREBASE: GROEPS CACHES
-        // ================================================================
-        function voegPopupCacheToe() {
-            const invoer = document.getElementById('popupLatInput').value.trim();
-            let lat, lng;
-
-            if (invoer) {
-                const result = parseCoords(invoer);
-                if (result) {
-                    lat = result.lat;
-                    lng = result.lng;
-                } else {
-                    const latStr = document.getElementById('popupLatInput').value.trim();
-                    const lngStr = document.getElementById('popupLngInput').value.trim();
-                    if (latStr && lngStr) {
-                        lat = parseFloat(latStr);
-                        lng = parseFloat(lngStr);
-                    }
-                }
-            } else {
-                const latStr = document.getElementById('popupLatInput').value.trim();
-                const lngStr = document.getElementById('popupLngInput').value.trim();
-                if (latStr && lngStr) {
-                    lat = parseFloat(latStr);
-                    lng = parseFloat(lngStr);
-                }
-            }
-
-            if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-                alert('❌ Voer geldige coördinaten in.');
-                return;
-            }
-
-            const naam = document.getElementById('popupNameInput').value.trim() || `Cache van ${huidigeGebruiker}`;
-            const beschrijving = document.getElementById('popupDescInput').value.trim() || 'Geen beschrijving';
-
-            const nieuweCache = {
-                lat,
-                lng,
-                naam,
-                beschrijving,
-                gebruiker: huidigeGebruiker,
-                timestamp: Date.now()
-            };
-
-            database.ref('groepscaches').push().set(nieuweCache).then(() => {
-                sluitCachePopup();
-                map.setView([lat, lng], 16);
-            }).catch(err => alert('❌ Fout: ' + err.message));
-        }
-
-        function wisMijnCaches() {
-            if (!huidigeGebruiker) return;
-            const eigenKeys = Object.keys(groepsCaches).filter(key => groepsCaches[key].gebruiker === huidigeGebruiker);
-            if (eigenKeys.length === 0) { alert('Je hebt nog geen eigen caches.'); return; }
-            if (!confirm(`🗑️ ${eigenKeys.length} cache(s) verwijderen?`)) return;
-            eigenKeys.forEach(key => database.ref('groepscaches/' + key).remove());
-        }
-
-        function updateOnlineGebruikers() {
-            database.ref('online').on('value', snap => {
-                const data = snap.val() || {};
-                const namen = Object.keys(data);
-                const el = document.getElementById('onlineGebruikers');
-                if (namen.length === 0) { el.innerHTML = '<span>👤 Jij</span>'; return; }
-                el.innerHTML = namen.map(n => `<span>${n === huidigeGebruiker ? '⭐ ' : ''}${n}</span>`).join('');
-                
-                // Update ook de gebruikers-pins op de kaart
-                updateGebruikersPins(data);
-            });
-        }
-
-        // ================================================================
-        // GEBRUIKERS PINS OP KAART
-        // ================================================================
-        function updateGebruikersPins(onlineData) {
-            if (!map) return;
-            
-            // Voeg pins toe voor alle online gebruikers (behalve jezelf)
-            Object.keys(onlineData).forEach(naam => {
-                if (naam === huidigeGebruiker) return;
-                const loc = onlineData[naam];
-                if (!loc || !loc.lat || !loc.lng) return;
-                
-                const key = 'user_' + naam;
-                if (!alleMarkers[key]) {
-                    const icon = L.divIcon({
-                        html: `<div style="background:#5f6b7a; width:20px; height:20px; border-radius:50%; border:2px solid white; box-shadow:0 2px 10px rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; font-size:10px; color:white; font-weight:bold;">${naam.charAt(0).toUpperCase()}</div>`,
-                        iconSize: [26, 26], iconAnchor: [13, 13]
-                    });
-                    const marker = L.marker([loc.lat, loc.lng], { icon }).addTo(map);
-                    marker.bindPopup(`<b>${naam}</b> is hier`);
-                    alleMarkers[key] = marker;
-                } else {
-                    alleMarkers[key].setLatLng([loc.lat, loc.lng]);
-                }
-            });
-            
-            // Verwijder pins van gebruikers die niet meer online zijn
-            Object.keys(alleMarkers).forEach(key => {
-                if (key.startsWith('user_')) {
-                    const naam = key.replace('user_', '');
-                    if (!onlineData[naam]) {
-                        map.removeLayer(alleMarkers[key]);
-                        delete alleMarkers[key];
-                    }
-                }
-            });
-        }
-
-        function luisterNaarGroepsCaches() {
-            database.ref('groepscaches').on('value', snap => {
-                const data = snap.val() || {};
-                groepsCaches = data;
-                // Verwijder oude markers
-                Object.keys(alleMarkers).forEach(key => {
-                    if (!data[key] && !key.startsWith('user_')) { 
-                        map.removeLayer(alleMarkers[key]);
-                        delete alleMarkers[key]; 
-                    }
-                });
-                // Voeg nieuwe markers toe
-                Object.keys(data).forEach(key => {
-                    const cache = data[key];
-                    if (!cache || alleMarkers[key]) return;
-                    const isVanMij = (cache.gebruiker === huidigeGebruiker);
-                    const geoIcon = L.divIcon({
-                        html: `<div style="background:${isVanMij ? '#2c5a47' : '#e67e22'}; width:26px; height:26px; border-radius:50%; border:3px solid white; box-shadow:0 2px 12px rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; font-size:14px;">${isVanMij ? '⭐' : '📦'}</div>`,
-                        iconSize: [32, 32], iconAnchor: [16, 16]
-                    });
-                    const popup = `
-                        <div class="popup-container">
-                            <div class="popup-title">${isVanMij ? '⭐ ' : '📦 '}${cache.naam}</div>
-                            <span class="popup-sub groep">${isVanMij ? 'Jouw cache' : 'Groepscache'}</span>
-                            <p class="popup-text">
-                                📍 ${cache.lat.toFixed(5)}, ${cache.lng.toFixed(5)}<br>
-                                👤 ${cache.gebruiker}${isVanMij ? ' (jij)' : ''}<br>
-                                <em>${cache.beschrijving || 'Geen beschrijving'}</em>
-                            </p>
-                            <button class="audio-btn" onclick="speelAudio('${cache.naam} toegevoegd door ${cache.gebruiker}')">🔊 Luister</button>
-                        </div>`;
-                    const marker = L.marker([cache.lat, cache.lng], { icon: geoIcon }).addTo(map).bindPopup(popup);
-                    alleMarkers[key] = marker;
-                    if (isVanMij) setTimeout(() => marker.openPopup(), 300);
-                });
-                updateCacheLijst();
-            });
-        }
-
-        function updateCacheLijst() {
-            const list = document.getElementById('cacheList');
-            const keys = Object.keys(groepsCaches);
-            if (keys.length === 0) { list.innerHTML = '<div class="no-caches">Nog geen caches toegevoegd</div>'; return; }
-            list.innerHTML = keys.map(key => {
-                const c = groepsCaches[key];
-                if (!c) return '';
-                const isVanMij = (c.gebruiker === huidigeGebruiker);
-                const desc = c.beschrijving && c.beschrijving !== 'Geen beschrijving' ? ` - "${c.beschrijving.substring(0,20)}${c.beschrijving.length > 20 ? '...' : ''}"` : '';
-                return `<div class="cache-item">
-                    <span>${isVanMij ? '⭐' : '📦'} ${c.naam}${desc}</span>
-                    <span class="coords-text">${c.gebruiker}</span>
-                    ${isVanMij ? `<button class="del-btn" onclick="verwijderCache('${key}')">✕</button>` : ''}
-                </div>`;
-            }).join('');
-        }
-
-        function verwijderCache(key) {
-            if (!confirm('Verwijder deze cache?')) return;
-            database.ref('groepscaches/' + key).remove();
-        }
-
-        // ================================================================
-        // POP-UP FUNCTIES
-        // ================================================================
-        function openCachePopup() {
-            document.getElementById('cachePopup').style.display = 'flex';
-            document.getElementById('popupLatInput').focus();
-        }
-
-        function sluitCachePopup() {
-            document.getElementById('cachePopup').style.display = 'none';
-            document.getElementById('popupLatInput').value = '';
-            document.getElementById('popupLngInput').value = '';
-            document.getElementById('popupNameInput').value = '';
-            document.getElementById('popupDescInput').value = '';
-        }
-
-        // ================================================================
-        // INLOG / UITLOG
-        // ================================================================
-        function login() {
-            const naam = document.getElementById('naamInput').value.trim();
-            if (!naam) { alert('Vul je voornaam in.'); return; }
-            const cleanNaam = naam.replace(/[^a-zA-Z0-9 ]/g, '').trim();
-            if (!cleanNaam) { alert('Gebruik alleen letters en cijfers.'); return; }
-            huidigeGebruiker = cleanNaam;
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('coordPanel').style.display = 'block';
-            document.getElementById('legende').style.display = 'flex';
-            document.getElementById('locateBtn').style.display = 'flex';
-            document.getElementById('userBadge').textContent = '👤 ' + huidigeGebruiker;
-            initKaart();
-            try { updateOnlineGebruikers();
-                luisterNaarGroepsCaches(); } catch (e) { console.warn("Firebase niet beschikbaar."); }
-            window.addEventListener('beforeunload', () => {
-                if (huidigeGebruiker) database.ref('online/' + huidigeGebruiker).remove();
-            });
-        }
-
-        function logout() {
-            if (huidigeGebruiker) database.ref('online/' + huidigeGebruiker).remove();
-            huidigeGebruiker = '';
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('coordPanel').style.display = 'none';
-            document.getElementById('legende').style.display = 'none';
-            document.getElementById('locateBtn').style.display = 'none';
-            Object.keys(alleMarkers).forEach(key => { map.removeLayer(alleMarkers[key]); });
-            alleMarkers = {};
-            groepsCaches = {};
-            database.ref('groepscaches').off();
-            database.ref('online').off();
-            if (userMarker) { map.removeLayer(userMarker);
-                userMarker = null; }
-            if (userCircle) { map.removeLayer(userCircle);
-                userCircle = null; }
-        }
-
-        // ================================================================
-        // START
-        // ================================================================
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('naamInput').addEventListener('keyup', (e) => { if (e.key === 'Enter') login(); });
-        });
-    </script>
-
-</body>
-</html>
+                                    text: "Deze kerk werd in 1430 gebruikt als vergaderplaats door
