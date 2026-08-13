@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🚶 Historische wandelingen · 6 steden · 4 thema's</title>
+    <title>🚶 Historische wandelingen · 6 steden · 4 thema's + 🚵 MTB</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         /* ---------- ALGEMEEN ---------- */
@@ -138,6 +138,7 @@
         .popup-sub.honderd { background: #b34b2e; }
         .popup-sub.woi { background: #5f6b7a; }
         .popup-sub.revolutie { background: #8e44ad; }
+        .popup-sub.mtb { background: #e67e22; }
         .popup-sub.groep { background: #2c5a47; }
         .popup-text { font-size: 12px; color: #ccc; text-align: left; margin: 4px 6px 6px 6px; line-height: 1.4; background: rgba(0,0,0,0.3); padding: 6px 8px; border-radius: 10px; }
         .popup-text .audio-btn { background: #f0d080; color: #222; border: none; padding: 6px 12px; border-radius: 30px; cursor: pointer; font-weight: 600; font-size: 12px; width: 100%; margin-top: 4px; }
@@ -157,6 +158,7 @@
         .legende-badge .dot.honderd { background: #b34b2e; }
         .legende-badge .dot.woi { background: #5f6b7a; }
         .legende-badge .dot.revolutie { background: #8e44ad; }
+        .legende-badge .dot.mtb { background: #e67e22; }
         .legende-badge .dot.groep { background: #2c5a47; }
 
         .locate-btn {
@@ -186,7 +188,7 @@
     <div id="loginScreen">
         <div class="login-box">
             <h1>🚶 Historische wandelingen</h1>
-            <p class="sub">6 steden · 4 thema's · eigen steden toevoegen</p>
+            <p class="sub">6 steden · 4 thema's + 🚵 MTB · eigen steden toevoegen</p>
             <label for="naamInput">Jouw voornaam</label>
             <input type="text" id="naamInput" placeholder="Bijv. Sophie" autofocus />
             <button onclick="login()">🔓 Start wandelen</button>
@@ -221,6 +223,7 @@
             <label><input type="checkbox" id="toggleHonderd" checked onchange="setStippel('honderd', this.checked)" /> 100-jarig</label>
             <label><input type="checkbox" id="toggleWOI" checked onchange="setStippel('woi', this.checked)" /> WO I</label>
             <label><input type="checkbox" id="toggleRevolutie" checked onchange="setStippel('revolutie', this.checked)" /> Revolutie</label>
+            <label><input type="checkbox" id="toggleMTB" checked onchange="setStippel('mtb', this.checked)" /> 🚵 MTB</label>
         </div>
 
         <!-- Stad toevoegen -->
@@ -283,6 +286,7 @@
         <span><span class="dot honderd"></span> 100-jarig</span>
         <span><span class="dot woi"></span> WO I</span>
         <span><span class="dot revolutie"></span> Revolutie</span>
+        <span><span class="dot mtb"></span> 🚵 MTB</span>
         <span><span class="dot groep"></span> Groepscache</span>
     </div>
 
@@ -334,11 +338,12 @@
             romeins: true,
             honderd: true,
             woi: true,
-            revolutie: true
+            revolutie: true,
+            mtb: true
         };
 
         // ================================================================
-        // STEDEN DATABASE (met Rouen en Reims toegevoegd)
+        // STEDEN DATABASE (met Rouen, Reims en MTB toegevoegd)
         // ================================================================
         function laadStandaardSteden() {
             steden = {
@@ -397,6 +402,19 @@
                                 { id: "a_v3", coords: [49.8925, 2.2990], title: "📜 Marktplein van de Revolutie",
                                     text: "Op dit plein werden revolutionaire proclamaties voorgelezen en vonden patriottische bijeenkomsten plaats." }
                             ]
+                        },
+                        mtb: {
+                            naam: "Mountainbike trails",
+                            kleur: "#e67e22",
+                            subClass: "mtb",
+                            stops: [
+                                { id: "a_m1", coords: [49.9200, 2.2300], title: "🚵 Forêt de Blangy",
+                                    text: "Technische singletrack door het bos, met wortels, heuvels en een paar spannende afdalingen." },
+                                { id: "a_m2", coords: [49.8700, 2.3300], title: "🚵 Forêt de Boves",
+                                    text: "Glooiende paden, snelle bochten en een paar steile klimmetjes – ideaal voor gevorderden." },
+                                { id: "a_m3", coords: [49.8900, 2.2800], title: "🚵 Vallée de la Somme",
+                                    text: "Paden langs de rivier, vlak en snel met mooie uitzichten – geschikt voor beginners." }
+                            ]
                         }
                     }
                 },
@@ -454,6 +472,19 @@
                                     text: "De Sint-Vulframuskerk werd in 1794 omgedoopt tot 'Tempel van de Rede' en ontdaan van religieuze symbolen." },
                                 { id: "b_v3", coords: [50.1035, 1.8335], title: "🪓 Marktplein van de guillotine",
                                     text: "Op dit plein stond tijdens de Terreur de guillotine opgesteld – tientallen 'tegenstanders' vonden hier de dood." }
+                            ]
+                        },
+                        mtb: {
+                            naam: "Mountainbike trails",
+                            kleur: "#e67e22",
+                            subClass: "mtb",
+                            stops: [
+                                { id: "b_m1", coords: [50.1500, 1.7200], title: "🚵 Forêt de Crécy",
+                                    text: "Uitgestrekte bossen met lange singletrack, afdalingen en technische passages." },
+                                { id: "b_m2", coords: [50.1300, 1.8100], title: "🚵 Vallée de la Maye",
+                                    text: "Paden door heuvelachtig terrein, met korte klimmen en snelle afdalingen." },
+                                { id: "b_m3", coords: [50.1700, 1.9000], title: "🚵 Forêt de Ponthieu",
+                                    text: "Rustige paden door het bos, geschikt voor zowel beginners als gevorderden." }
                             ]
                         }
                     }
@@ -719,7 +750,8 @@
                     romeins: { naam: `Romeins ${naam}`, kleur: "#1d6b4c", subClass: "romeins", stops: [] },
                     honderd: { naam: `100-jarig ${naam}`, kleur: "#b34b2e", subClass: "honderd", stops: [] },
                     woi: { naam: `WO I ${naam}`, kleur: "#5f6b7a", subClass: "woi", stops: [] },
-                    revolutie: { naam: `Revolutie ${naam}`, kleur: "#8e44ad", subClass: "revolutie", stops: [] }
+                    revolutie: { naam: `Revolutie ${naam}`, kleur: "#8e44ad", subClass: "revolutie", stops: [] },
+                    mtb: { naam: `MTB ${naam}`, kleur: "#e67e22", subClass: "mtb", stops: [] }
                 }
             };
             vulStedenDropdown();
@@ -1004,7 +1036,7 @@
         }
 
         // ================================================================
-        // GEBRUIKERS PINS OP KAART (NIEUW)
+        // GEBRUIKERS PINS OP KAART
         // ================================================================
         function updateGebruikersPins(onlineData) {
             if (!map) return;
