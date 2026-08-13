@@ -36,16 +36,6 @@
         .login-box .gebruikers span { background: #eeeae6; padding: 4px 14px; border-radius: 30px; display: inline-block; margin: 4px 4px 0 0; font-weight: 500; color: #2d3d35; }
 
         /* ---------- PANEEL ---------- */
-        <!-- Upload routes -->
-<div style="margin: 6px 0 4px 0;">
-    <input type="file" id="routeUpload" accept=".gpx,.kml,.csv" style="display:none;" onchange="verwerkUpload(event)" />
-    <button class="btn-stad" onclick="document.getElementById('routeUpload').click()" style="width:100%; padding:8px;">
-        📤 Upload route (GPX/KML/CSV)
-    </button>
-</div>
-<div id="uploadedRoutesList" style="margin-top:4px; max-height:60px; overflow-y:auto; border-top:1px solid #444; padding-top:4px; font-size:11px;">
-    <div class="no-caches">Geen routes geüpload</div>
-</div>
         .coord-panel {
             position: absolute; top: 20px; left: 20px; z-index: 1000;
             background: rgba(30,30,30,0.92); backdrop-filter: blur(12px);
@@ -98,6 +88,17 @@
         .stad-toevoeg.show { display: block; }
         .stad-toevoeg input { width: 100%; padding: 4px 8px; border-radius: 8px; border: 1px solid #555; background: #222; color: #eee; font-size: 12px; margin-bottom: 4px; }
         .stad-toevoeg input:focus { border-color: #f0d080; }
+
+        /* ---------- Upload routes CSS ---------- */
+        .upload-route-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 2px 0; border-bottom: 1px solid #333;
+        }
+        .upload-route-item label {
+            display: flex; align-items: center; gap: 4px; font-size: 11px; color: #ccc; cursor: pointer;
+        }
+        .upload-route-item input[type="checkbox"] { accent-color: #e74c3c; width: 12px; height: 12px; }
+        .upload-route-item .del-btn { background:none; border:none; color:#e67e22; cursor:pointer; font-weight:700; font-size:12px; padding:0 4px; }
 
         /* ---------- POP-UP VOOR CACHE TOEVOEGEN ---------- */
         #cachePopup {
@@ -226,6 +227,17 @@
         <!-- Stadskeuze -->
         <select class="stad-selector" id="stadSelector" onchange="wisselStad(this.value)"></select>
         
+        <!-- Upload routes -->
+        <div style="margin: 6px 0 4px 0;">
+            <input type="file" id="routeUpload" accept=".gpx,.kml,.csv" style="display:none;" onchange="verwerkUpload(event)" />
+            <button class="btn-stad" onclick="document.getElementById('routeUpload').click()" style="width:100%; padding:8px;">
+                📤 Upload route (GPX/KML/CSV)
+            </button>
+        </div>
+        <div id="uploadedRoutesList" style="margin-top:4px; max-height:60px; overflow-y:auto; border-top:1px solid #444; padding-top:4px; font-size:11px;">
+            <div class="no-caches">Geen routes geüpload</div>
+        </div>
+
         <!-- KML Track toggle -->
         <div style="display:flex; gap:8px; margin-bottom:8px; background:#1a1a1a; padding:4px 8px; border-radius:8px; border:1px solid #444;">
             <label style="display:flex; align-items:center; gap:4px; font-size:12px; font-weight:500; color:#ccc; cursor:pointer;">
@@ -2102,6 +2114,218 @@
                 opt.textContent = key.charAt(0).toUpperCase() + key.slice(1);
                 selector.appendChild(opt);
             });
+        }
+
+        // ================================================================
+        // ROUTE UPLOAD & PARSING
+        // ================================================================
+        let geuploadeRoutes = {}; // { bestandsnaam: { punten, layer, kleur, zichtbaar } }
+        let routeKleuren = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#2c3e50'];
+
+        function verwerkUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const lezer = new FileReader();
+            lezer.onload = function(e) {
+                const inhoud = e.target.result;
+                const ext = file.name.split('.').pop().toLowerCase();
+                let punten = [];
+                
+                try {
+                    if (ext === 'csv') {
+                        punten = parseCSV(inhoud);
+                    } else if (ext === 'gpx') {
+                        punten = parseGPX(inhoud);
+                    } else if (ext === 'kml') {
+                        punten = parseKML(inhoud);
+                    } else {
+                        alert('❌ Alleen GPX, KML en CSV worden ondersteund.');
+                        return;
+                    }
+                    
+                    if (punten.length < 2) {
+                        alert('❌ Geen geldige coördinaten gevonden in het bestand.');
+                        return;
+                    }
+                    
+                    const naam = file.name.replace(/\.[^.]+$/, '');
+                    voegRouteToe(naam, punten);
+                    
+                    // Reset input zodat je hetzelfde bestand opnieuw kunt uploaden
+                    document.getElementById('routeUpload').value = '';
+                    
+                } catch (err) {
+                    alert('❌ Fout bij verwerken: ' + err.message);
+                }
+            };
+            lezer.readAsText(file);
+        }
+
+        // ---------- PARSERS ----------
+        function parseCSV(tekst) {
+            const regels = tekst.split('\n').filter(r => r.trim() !== '');
+            const punten = [];
+            
+            // Probeer header te detecteren
+            const startIndex = regels[0].toLowerCase().includes('lat') ? 1 : 0;
+            
+            for (let i = startIndex; i < regels.length; i++) {
+                const delen = regels[i].split(',');
+                if (delen.length < 2) continue;
+                
+                // Probeer lat/lng te vinden (flexibel)
+                let lat, lng;
+                for (let j = 0; j < delen.length; j++) {
+                    const waarde = parseFloat(delen[j].trim());
+                    if (!isNaN(waarde)) {
+                        if (lat === undefined && waarde >= -90 && waarde <= 90) {
+                            lat = waarde;
+                        } else if (lng === undefined && waarde >= -180 && waarde <= 180) {
+                            lng = waarde;
+                        }
+                    }
+                }
+                
+                if (lat !== undefined && lng !== undefined) {
+                    punten.push([lat, lng]);
+                }
+            }
+            return punten;
+        }
+
+        function parseGPX(tekst) {
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(tekst, 'text/xml');
+            const punten = [];
+            
+            xml.querySelectorAll('trkpt').forEach(pt => {
+                const lat = parseFloat(pt.getAttribute('lat'));
+                const lng = parseFloat(pt.getAttribute('lon'));
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    punten.push([lat, lng]);
+                }
+            });
+            
+            return punten;
+        }
+
+        function parseKML(tekst) {
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(tekst, 'text/xml');
+            const punten = [];
+            
+            // Zoek naar <coordinates> in <LineString> of <LinearRing>
+            xml.querySelectorAll('coordinates').forEach(coordEl => {
+                const coordText = coordEl.textContent.trim();
+                const coordPairs = coordText.split(/\s+/);
+                coordPairs.forEach(pair => {
+                    const delen = pair.split(',');
+                    if (delen.length >= 2) {
+                        const lng = parseFloat(delen[0]);
+                        const lat = parseFloat(delen[1]);
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            punten.push([lat, lng]);
+                        }
+                    }
+                });
+            });
+            
+            return punten;
+        }
+
+        // ---------- ROUTE TOEVOEGEN ----------
+        function voegRouteToe(naam, punten) {
+            if (!map) return;
+            
+            // Voorkom dubbele namen
+            let uniekeNaam = naam;
+            let teller = 1;
+            while (geuploadeRoutes[uniekeNaam]) {
+                uniekeNaam = `${naam} (${teller})`;
+                teller++;
+            }
+            
+            // Kies kleur
+            const kleur = routeKleuren[Object.keys(geuploadeRoutes).length % routeKleuren.length];
+            
+            // Teken de route
+            const laag = L.polyline(punten, {
+                color: kleur,
+                weight: 3,
+                opacity: 0.8,
+                lineJoin: 'round',
+                lineCap: 'round'
+            }).addTo(map);
+            
+            // Voeg start/eind-pin toe
+            const startPunt = punten[0];
+            const eindPunt = punten[punten.length - 1];
+            
+            const pinIcon = L.divIcon({
+                html: `<div style="background:${kleur}; width:18px; height:18px; border-radius:50%; border:2px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; font-size:10px; color:white; font-weight:bold;">🚵</div>`,
+                iconSize: [24, 24], iconAnchor: [12, 12]
+            });
+            
+            L.marker(startPunt, { icon: pinIcon })
+                .bindPopup(`<b>🚵 Start: ${uniekeNaam}</b>`)
+                .addTo(laag);
+            
+            L.marker(eindPunt, { icon: pinIcon })
+                .bindPopup(`<b>🚵 Einde: ${uniekeNaam}</b>`)
+                .addTo(laag);
+            
+            // Opslaan
+            geuploadeRoutes[uniekeNaam] = {
+                punten: punten,
+                layer: laag,
+                kleur: kleur,
+                zichtbaar: true
+            };
+            
+            updateRouteLijst();
+        }
+
+        // ---------- TOGGLE & VERWIJDEREN ----------
+        function toggleRoute(naam, aan) {
+            if (!geuploadeRoutes[naam]) return;
+            const route = geuploadeRoutes[naam];
+            route.zichtbaar = aan;
+            if (aan) {
+                map.addLayer(route.layer);
+            } else {
+                map.removeLayer(route.layer);
+            }
+        }
+
+        function verwijderRoute(naam) {
+            if (!geuploadeRoutes[naam]) return;
+            if (!confirm(`Verwijder route "${naam}"?`)) return;
+            const route = geuploadeRoutes[naam];
+            map.removeLayer(route.layer);
+            delete geuploadeRoutes[naam];
+            updateRouteLijst();
+        }
+
+        function updateRouteLijst() {
+            const lijst = document.getElementById('uploadedRoutesList');
+            const namen = Object.keys(geuploadeRoutes);
+            if (namen.length === 0) {
+                lijst.innerHTML = '<div class="no-caches">Geen routes geüpload</div>';
+                return;
+            }
+            lijst.innerHTML = namen.map(naam => {
+                const route = geuploadeRoutes[naam];
+                return `
+                    <div class="upload-route-item">
+                        <label>
+                            <input type="checkbox" checked onchange="toggleRoute('${naam}', this.checked)" />
+                            <span style="color:${route.kleur}; font-weight:600;">🚵</span> ${naam}
+                        </label>
+                        <button class="del-btn" onclick="verwijderRoute('${naam}')">✕</button>
+                    </div>
+                `;
+            }).join('');
         }
 
         // ================================================================
