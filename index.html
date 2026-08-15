@@ -353,38 +353,49 @@
         // ==============================================================
         // STEDEN DATABASE
         // ==============================================================
-        function laadStandaardSteden() {
-            steden = {
-                amiens: {
-                    center: [49.8945, 2.2990], zoom: 14, routes: {
-                        romeins: { naam: "Romeins Amiens (rondje)", kleur: "#1d6b4c", subClass: "romeins", stops: [
-                            { id: "a_r1", coords: [49.8942, 2.3006], title: "Forum & Amfitheater", text: "Onder de Rue des Trois Cailloux liggen de massieve fundamenten van het grote Romeinse amfitheater." },
-                            { id: "a_r2", coords: [49.8913, 2.2965], title: "Musée de Picardie", text: "Dé schatkamer met fabelachtig bewaarde mozaïeken en antieke glasvondsten." },
-                            { id: "a_r3", coords: [49.8992, 2.3085], title: "Park Saint-Pierre", text: "Aan de Somme, de levensader voor Romeinse vrachtschepen." },
-                            { id: "a_r4", coords: [49.8942, 2.3006], title: "Terug bij Forum", text: "Rondje voltooid!" }
-                        ] },
-                        honderd: { naam: "100-jarige oorlog (rondje)", kleur: "#b34b2e", subClass: "honderd", stops: [
-                            { id: "a_h1", coords: [49.8948, 2.3019], title: "Kathedraal", text: "Strategisch bolwerk tijdens de Honderdjarige Oorlog." },
-                            { id: "a_h2", coords: [49.8970, 2.3040], title: "Saint-Leu", text: "Decor van schermutselingen tussen Engelsen en Bourgondiërs." },
-                            { id: "a_h3", coords: [49.8950, 2.3030], title: "Oude stadspoort", text: "Onderdeel van de middeleeuwse verdedigingswerken." },
-                            { id: "a_h4", coords: [49.8948, 2.3019], title: "Terug bij Kathedraal", text: "Rondje voltooid!" }
-                        ] },
-                        woi: { naam: "Eerste Wereldoorlog (rondje)", kleur: "#5f6b7a", subClass: "woi", stops: [
-                            { id: "a_w1", coords: [49.8922, 2.2955], title: "Hôtel de Ville", text: "Toneel van hevige gevechten tijdens het Duitse lenteoffensief (1918)." },
-                            { id: "a_w2", coords: [49.8960, 2.3000], title: "Pont de la Porte", text: "Strategisch doelwit in 1918, hersteld door Australische genietroepen." },
-                            { id: "a_w3", coords: [49.8880, 2.2890], title: "Cimetière St.-Acheul", text: "Meer dan 600 Commonwealth-soldaten rusten hier." },
-                            { id: "a_w4", coords: [49.8922, 2.2955], title: "Terug bij Hôtel de Ville", text: "Rondje voltooid!" }
-                        ] },
-                        revolutie: { naam: "Franse Revolutie (rondje)", kleur: "#8e44ad", subClass: "revolutie", stops: [
-                            { id: "a_v1", coords: [49.8940, 2.2980], title: "Place de la République", text: "Hier werden de eerste revolutionaire bijeenkomsten gehouden." }
-                        ] }
-                    }
-                },
-                abbeville: { center: [50.1060, 1.8320], zoom: 14, routes: { /* ... routes afgekort voor demo ... */ } },
-                arras: { center: [50.2910, 2.7770], zoom: 14, routes: { /* ... routes afgekort voor demo ... */ } }
-            };
+          function toggleStadToevoeg() {
+            document.getElementById('stadToevoegForm').classList.toggle('show');
         }
-        laadStandaardSteden();
+
+        function voegStadToe() {
+            const naam = document.getElementById('stadNaam').value.trim();
+            const lat = parseFloat(document.getElementById('stadLat').value.trim());
+            const lng = parseFloat(document.getElementById('stadLng').value.trim());
+            const zoom = parseInt(document.getElementById('stadZoom').value.trim()) || 14;
+            if (!naam || isNaN(lat) || isNaN(lng)) { alert('Vul een geldige stadsnaam en coördinaten in.'); return; }
+            const key = naam.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (steden[key]) { alert('Deze stad bestaat al!'); return; }
+            steden[key] = {
+                center: [lat, lng],
+                zoom: zoom,
+                routes: {
+                    romeins: { naam: `Romeins ${naam} (rondje)`, kleur: "#1d6b4c", subClass: "romeins", stops: [] },
+                    honderd: { naam: `100-jarig ${naam} (rondje)`, kleur: "#b34b2e", subClass: "honderd", stops: [] },
+                    woi: { naam: `WO I ${naam} (rondje)`, kleur: "#5f6b7a", subClass: "woi", stops: [] },
+                    revolutie: { naam: `Revolutie ${naam} (rondje)`, kleur: "#8e44ad", subClass: "revolutie", stops: [] }
+                }
+            };
+            vulStedenDropdown();
+            document.getElementById('stadSelector').value = key;
+            wisselStad(key);
+            document.getElementById('stadNaam').value = '';
+            document.getElementById('stadLat').value = '';
+            document.getElementById('stadLng').value = '';
+            document.getElementById('stadZoom').value = '14';
+            toggleStadToevoeg();
+            alert(`✅ Stad "${naam}" toegevoegd!`);
+        }
+
+        function vulStedenDropdown() {
+            const selector = document.getElementById('stadSelector');
+            selector.innerHTML = '';
+            Object.keys(steden).forEach(key => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+                selector.appendChild(opt);
+            });
+        }
 
         // ==============================================================
         // PANEEL FUNCTIE (In-/uitklapbaar)
