@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>🚶 Historische wandelingen · Walkie-Talkie</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
         /* ---------- RESET & BASIS ---------- */
@@ -514,6 +513,27 @@
         };
 
         // ============================================================
+        // BEZIENSWAARDIGHEDEN (POI's)
+        // ============================================================
+        const poiData = [
+            // Abbeville
+            { stad: 'abbeville', thema: 'romeins', lat: 50.1065, lng: 1.8325, naam: 'Romeinse nederzetting', beschrijving: 'Sporen van een Gallo-Romeinse villa.' },
+            { stad: 'abbeville', thema: 'honderd', lat: 50.1040, lng: 1.8290, naam: 'Honderdjarige Oorlog – slagveld', beschrijving: 'Locatie van een schermutseling uit de Honderdjarige Oorlog.' },
+            { stad: 'abbeville', thema: 'woi', lat: 50.1070, lng: 1.8305, naam: 'WOI-loopgraven', beschrijving: 'Restanten van Duitse loopgraven uit de Eerste Wereldoorlog.' },
+            { stad: 'abbeville', thema: 'revolutie', lat: 50.1035, lng: 1.8275, naam: 'Revolutieplein', beschrijving: 'Hier vonden bijeenkomsten plaats tijdens de Franse Revolutie.' },
+            // Amiens
+            { stad: 'amiens', thema: 'romeins', lat: 49.8950, lng: 2.3000, naam: 'Romeins aquaduct', beschrijving: 'Overblijfselen van een Romeins aquaduct.' },
+            { stad: 'amiens', thema: 'honderd', lat: 49.8920, lng: 2.3050, naam: 'Burcht uit de Honderdjarige Oorlog', beschrijving: 'Versterkt kasteel uit de 14e eeuw.' },
+            { stad: 'amiens', temaa: 'woi', lat: 49.8900, lng: 2.2950, naam: 'WOI-ziekenhuis', beschrijving: 'Voormalig veldhospitaal uit 1916.' },
+            { stad: 'amiens', thema: 'revolutie', lat: 49.8970, lng: 2.3010, naam: 'Guillotineplaats', beschrijving: 'Plaats waar tijdens de Revolutie executies plaatsvonden.' },
+            // Arras
+            { stad: 'arras', thema: 'romeins', lat: 50.2900, lng: 2.7780, naam: 'Romeinse weg', beschrijving: 'Oude Romeinse heerweg.' },
+            { stad: 'arras', thema: 'honderd', lat: 50.2920, lng: 2.7760, naam: 'Slag bij Arras (1415)', beschrijving: 'Herdenkingsplaats van de slag.' },
+            { stad: 'arras', thema: 'woi', lat: 50.2880, lng: 2.7800, naam: 'WOI-kerkhof', beschrijving: 'Brits oorlogskerkhof.' },
+            { stad: 'arras', thema: 'revolutie', lat: 50.2930, lng: 2.7740, naam: 'Revolutiekerk', beschrijving: 'Kerk die diende als revolutionair vergaderlokaal.' }
+        ];
+
+        // ============================================================
         // KML-COÖRDINATEN (Abbeville track)
         // ============================================================
         const kmlCoordinaten = [
@@ -819,9 +839,75 @@
 
             vulStadSelector();
             tekenKMLTrack();
+            tekenPOIs(); // Voeg bezienswaardigheden toe
             luisterNaarFirebase();
         }
 
+        // ----- POI (Bezienswaardigheden) -----
+        let poiMarkers = [];
+
+        function tekenPOIs() {
+            // Verwijder oude POI-markers
+            poiMarkers.forEach(m => map.removeLayer(m));
+            poiMarkers = [];
+
+            // Filter op huidige stad
+            const stadPOIs = poiData.filter(p => p.stad === huidigeStad);
+
+            stadPOIs.forEach(p => {
+                // Controleer of thema is ingeschakeld
+                if (!stippelStatus[p.thema]) return;
+
+                let kleur;
+                switch(p.thema) {
+                    case 'romeins': kleur = '#1d6b4c'; break;
+                    case 'honderd': kleur = '#b34b2e'; break;
+                    case 'woi': kleur = '#5f6b7a'; break;
+                    case 'revolutie': kleur = '#8e44ad'; break;
+                    default: kleur = '#888';
+                }
+
+                const marker = L.circleMarker([p.lat, p.lng], {
+                    color: kleur,
+                    fillColor: kleur,
+                    fillOpacity: 0.7,
+                    radius: 7
+                }).addTo(map);
+
+                marker.bindPopup(`
+                    <div class="popup-container">
+                        <div class="popup-title">${p.naam}</div>
+                        <div class="popup-sub ${p.thema}">${p.thema}</div>
+                        <div class="popup-text">${p.beschrijving}</div>
+                    </div>
+                `);
+                poiMarkers.push(marker);
+            });
+        }
+
+        // ----- KML & THEMA -----
+        function tekenKMLTrack() {
+            if (kmlLayer) map.removeLayer(kmlLayer);
+            if (kmlCoordinaten && kmlCoordinaten.length > 0) {
+                kmlLayer = L.polyline(kmlCoordinaten, { color: '#e74c3c', weight: 4, opacity: 0.8 });
+                if (kmlZichtbaar) kmlLayer.addTo(map);
+            }
+        }
+
+        function toggleKMLTrack(checked) {
+            kmlZichtbaar = checked;
+            if (kmlLayer) {
+                if (kmlZichtbaar) map.addLayer(kmlLayer);
+                else map.removeLayer(kmlLayer);
+            }
+        }
+
+        function setStippel(thema, checked) {
+            stippelStatus[thema] = checked;
+            tekenPOIs(); // ververs de POI-markers
+        }
+
+        // ----- Overige functies (stad, cache, upload, etc.) -----
         function vulStadSelector() {
             const sel = document.getElementById('stadSelector');
             sel.innerHTML = '';
@@ -870,6 +956,7 @@
             if (steden[stadKey]) {
                 huidigeStad = stadKey;
                 map.setView([steden[stadKey].lat, steden[stadKey].lng], steden[stadKey].zoom);
+                tekenPOIs(); // toon POI's van de nieuwe stad
             }
         }
 
@@ -905,7 +992,6 @@
 
         function sluitCachePopup() {
             document.getElementById('cachePopup').style.display = 'none';
-            // verwijder event listener voor kaartklik
             if (map) map.off('click', handleMapClick);
         }
 
@@ -937,7 +1023,6 @@
 
         function kiesOpKaart() {
             sluitCachePopup();
-            // Zet kaart in selectiemodus
             map.once('click', handleMapClick);
             alert("Klik op de kaart om de locatie te kiezen.");
         }
@@ -1012,27 +1097,6 @@
             });
         }
 
-        // ----- KML & THEMA -----
-        function tekenKMLTrack() {
-            if (kmlLayer) map.removeLayer(kmlLayer);
-            if (kmlCoordinaten && kmlCoordinaten.length > 0) {
-                kmlLayer = L.polyline(kmlCoordinaten, { color: '#e74c3c', weight: 4, opacity: 0.8 });
-                if (kmlZichtbaar) kmlLayer.addTo(map);
-            }
-        }
-
-        function toggleKMLTrack(checked) {
-            kmlZichtbaar = checked;
-            if (kmlLayer) {
-                if (kmlZichtbaar) map.addLayer(kmlLayer);
-                else map.removeLayer(kmlLayer);
-            }
-        }
-
-        function setStippel(thema, checked) {
-            stippelStatus[thema] = checked;
-        }
-
         function toggleRouteMenu() {
             const container = document.getElementById('uploadedRoutesContainer');
             const toggleIcon = document.getElementById('routeMenuToggle');
@@ -1102,12 +1166,10 @@
             wtModal.style.display = 'none';
         }
 
-        // Sluit modal bij klik buiten box
         wtModal.addEventListener('click', function(e) {
             if (e.target === this) sluitWtModal();
         });
 
-        // PeerJS functies
         function wtUpdateStatus(state, text) {
             const states = {
                 online: { class: 'online', text: 'Online' },
@@ -1163,7 +1225,6 @@
                 wtAddChat(`👋 ${data.username}`, `verbonden`, true);
                 conn.send({ type:'hello_ack', username:huidigeGebruiker });
                 wtUpdateUserList();
-                // Als leider, stuur eventueel state (geen state hier)
             }
             if (data.type === 'hello_ack') {
                 wtAddChat(`👋 ${data.username}`, `bevestigd`, true);
@@ -1171,7 +1232,6 @@
             }
             if (data.type === 'chat') {
                 wtAddChat(`💬 ${data.sender}`, data.text);
-                // Leider stuurt door naar anderen
                 if (isLeider) {
                     connections.forEach(c => {
                         if (c !== conn) { try { c.send(data); } catch(e) {} }
@@ -1230,7 +1290,6 @@
                 wtChatInput.disabled = false;
                 wtChatSendBtn.disabled = false;
 
-                // Als deelnemer, verbind met hub
                 if (!isLeider) {
                     const conn = peer.connect(WT_HUB_ID);
                     setupDataConnection(conn);
@@ -1248,7 +1307,6 @@
                     });
                 }
 
-                // Luister naar inkomende verbindingen (alleen leider accepteert)
                 peer.on('connection', (conn) => { setupDataConnection(conn); });
                 peer.on('call', (call) => {
                     if (isLeider) {
@@ -1265,8 +1323,7 @@
                             wtAddChat(`📞 Audio`, `Verbinding met ${call.peer} verbroken`, true);
                         });
                     } else {
-                        // Deelnemer accepteert alleen calls van hub? of van anderen? Voor simpel, weigeren.
-                        call.answer(); // geen stream, want we willen niet praten met niet-hub
+                        call.answer();
                     }
                 });
             });
@@ -1367,7 +1424,6 @@
         // ============================================================
         // START
         // ============================================================
-        // Inlogscherm zichtbaar
         document.getElementById('loginScreen').classList.remove('hidden');
         document.getElementById('coordPanel').style.display = 'none';
         document.getElementById('legende').style.display = 'none';
