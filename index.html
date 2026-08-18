@@ -8,289 +8,952 @@
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
         /* ---------- RESET & BASIS ---------- */
-        * { box-sizing: border-box; }
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', system-ui, sans-serif; background: #0d0d0d; }
-        #map { height: 100%; width: 100%; background: #1a1a1a; }
+        * {
+            box-sizing: border-box;
+        }
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0d0d0d;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+            background: #1a1a1a;
+        }
 
         /* ---------- INLOG ---------- */
         #loginScreen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(10,10,10,0.85); backdrop-filter: blur(8px);
-            display: flex; align-items: center; justify-content: center; z-index: 9999;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
             transition: opacity 0.5s ease;
         }
-        #loginScreen.hidden { opacity: 0; pointer-events: none; }
+        #loginScreen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
         .login-box {
-            background: rgba(30,30,30,0.96); backdrop-filter: blur(12px);
-            padding: 32px 30px; border-radius: 32px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-            max-width: 420px; width: 90%; text-align: center;
-            border: 1px solid rgba(255,215,0,0.2);
+            background: rgba(30, 30, 30, 0.96);
+            backdrop-filter: blur(12px);
+            padding: 32px 30px;
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.2);
             color: #eee;
         }
-        .login-box h1 { font-size: 26px; margin: 0 0 4px; color: #f0d080; }
-        .login-box .sub { font-size: 14px; color: #999; margin-bottom: 20px; }
-        .login-box label { display: block; text-align: left; font-weight: 600; font-size: 13px; margin-bottom: 4px; color: #bbb; }
-        .login-box input, .login-box select {
-            width: 100%; padding: 12px 14px; border: 1px solid #444;
-            border-radius: 14px; font-size: 16px; background: #1a1a1a; color: #eee;
-            margin-bottom: 14px; transition: 0.2s;
+        .login-box h1 {
+            font-size: 26px;
+            margin: 0 0 4px;
+            color: #f0d080;
         }
-        .login-box input:focus, .login-box select:focus { border-color: #f0d080; outline: none; box-shadow: 0 0 0 4px rgba(240,208,128,0.15); }
+        .login-box .sub {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 20px;
+        }
+        .login-box label {
+            display: block;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: #bbb;
+        }
+        .login-box input,
+        .login-box select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #444;
+            border-radius: 14px;
+            font-size: 16px;
+            background: #1a1a1a;
+            color: #eee;
+            margin-bottom: 14px;
+            transition: 0.2s;
+        }
+        .login-box input:focus,
+        .login-box select:focus {
+            border-color: #f0d080;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(240, 208, 128, 0.15);
+        }
         .login-box button {
-            width: 100%; padding: 14px; background: #2c5a47; color: white; border: none;
-            border-radius: 40px; font-size: 18px; font-weight: 700; cursor: pointer;
-            transition: 0.2s ease; box-shadow: 0 4px 16px rgba(44,90,71,0.3);
+            width: 100%;
+            padding: 14px;
+            background: #2c5a47;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+            box-shadow: 0 4px 16px rgba(44, 90, 71, 0.3);
         }
-        .login-box button:hover { background: #1d4032; transform: scale(0.98); }
-        .login-box .gebruikers { font-size: 13px; color: #888; margin-top: 12px; }
-        .login-box .gebruikers span { background: #2a2a2a; padding: 4px 14px; border-radius: 30px; display: inline-block; margin: 4px 4px 0 0; color: #ddd; }
+        .login-box button:hover {
+            background: #1d4032;
+            transform: scale(0.98);
+        }
+        .login-box .gebruikers {
+            font-size: 13px;
+            color: #888;
+            margin-top: 12px;
+        }
+        .login-box .gebruikers span {
+            background: #2a2a2a;
+            padding: 4px 14px;
+            border-radius: 30px;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+            color: #ddd;
+        }
 
-        /* ---------- COORDINATEN PANEEL ---------- */
-        .coord-panel {
-            position: absolute; top: 20px; left: 20px; z-index: 1000;
-            background: rgba(20,20,20,0.92); backdrop-filter: blur(12px);
-            padding: 16px; border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-            min-width: 260px; max-width: 320px;
-            border: 1px solid rgba(255,215,0,0.15); color: #eee;
-            transition: all 0.2s;
+        /* ---------- POPUP MENU (zwevend, inklapbaar) ---------- */
+        #popupMenu {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(20, 20, 20, 0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            color: #eee;
+            min-width: 280px;
+            max-width: 340px;
+            transition: all 0.3s ease;
+            overflow: hidden;
         }
-        .coord-panel h3 { margin: 0 0 8px; font-size: 15px; color: #f0d080; display: flex; align-items: center; justify-content: space-between; }
-        .coord-panel .user-badge { font-size: 13px; background: #2a2a2a; padding: 2px 14px; border-radius: 30px; font-weight: 600; }
-        .coord-panel .stad-selector {
-            width: 100%; padding: 6px 10px; border-radius: 10px; border: 1px solid #444;
-            background: #1a1a1a; color: #eee; font-size: 13px; font-weight: 600;
-            margin-bottom: 10px; cursor: pointer;
+        #popupMenu.collapsed .menu-body {
+            max-height: 0;
+            padding: 0 16px;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
         }
-        .coord-panel .stad-selector:focus { border-color: #f0d080; }
-        .coord-panel .stad-selector option { background: #1a1a1a; }
+        #popupMenu .menu-body {
+            padding: 12px 16px 16px;
+            max-height: 600px;
+            overflow-y: auto;
+            transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+        .menu-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            background: rgba(30, 30, 30, 0.6);
+            border-radius: 20px 20px 0 0;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .menu-header:hover {
+            background: rgba(40, 40, 40, 0.8);
+        }
+        .menu-header .title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f0d080;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .menu-header .title .user-badge {
+            font-size: 12px;
+            background: #2a2a2a;
+            padding: 2px 14px;
+            border-radius: 30px;
+            font-weight: 600;
+            color: #ddd;
+        }
+        .menu-header .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .menu-header .controls button {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 4px;
+            transition: color 0.2s, transform 0.2s;
+            line-height: 1;
+        }
+        .menu-header .controls button:hover {
+            color: #f0d080;
+            transform: scale(1.1);
+        }
+        .menu-header .controls .toggle-btn {
+            font-size: 22px;
+            font-weight: 700;
+            transform: rotate(0deg);
+            transition: transform 0.3s ease;
+            color: #f0d080;
+        }
+        #popupMenu.collapsed .menu-header .controls .toggle-btn {
+            transform: rotate(-90deg);
+        }
+        .menu-header .controls .minmax-btn {
+            font-size: 16px;
+        }
 
-        /* Thema toggles */
+        /* inhoud menu-body */
+        .stad-selector {
+            width: 100%;
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            color: #eee;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .stad-selector:focus {
+            border-color: #f0d080;
+        }
+        .stad-selector option {
+            background: #1a1a1a;
+        }
+
         .thema-toggles {
-            display: flex; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 8px;
-            background: #1a1a1a; padding: 6px 10px; border-radius: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 12px;
+            margin-bottom: 8px;
+            background: #1a1a1a;
+            padding: 6px 10px;
+            border-radius: 10px;
             border: 1px solid #333;
         }
         .thema-toggles label {
-            display: flex; align-items: center; gap: 4px;
-            font-size: 12px; font-weight: 500; color: #ccc; cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #ccc;
+            cursor: pointer;
         }
-        .thema-toggles input[type="checkbox"] { accent-color: #f0d080; width: 14px; height: 14px; cursor: pointer; }
+        .thema-toggles input[type="checkbox"] {
+            accent-color: #f0d080;
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
 
-        .coord-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+        .coord-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
         .coord-actions button {
-            padding: 8px 14px; border: none; border-radius: 30px; font-weight: 600;
-            font-size: 12px; cursor: pointer; transition: 0.15s ease; flex: 1; min-width: 60px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.15s ease;
+            flex: 1;
+            min-width: 60px;
         }
-        .btn-add { background: #2c5a47; color: white; }
-        .btn-add:hover { background: #1d4032; }
-        .btn-clear { background: #5a4a3a; color: white; }
-        .btn-clear:hover { background: #4a3a2a; }
-        .btn-logout { background: #b34b2e; color: white; }
-        .btn-logout:hover { background: #8a3a22; }
-        .btn-stad { background: #3a5a8a; color: white; }
-        .btn-stad:hover { background: #2a4a7a; }
+        .btn-add {
+            background: #2c5a47;
+            color: white;
+        }
+        .btn-add:hover {
+            background: #1d4032;
+        }
+        .btn-clear {
+            background: #5a4a3a;
+            color: white;
+        }
+        .btn-clear:hover {
+            background: #4a3a2a;
+        }
+        .btn-logout {
+            background: #b34b2e;
+            color: white;
+        }
+        .btn-logout:hover {
+            background: #8a3a22;
+        }
+        .btn-stad {
+            background: #3a5a8a;
+            color: white;
+        }
+        .btn-stad:hover {
+            background: #2a4a7a;
+        }
+        .btn-poi {
+            background: #8e44ad;
+            color: white;
+        }
+        .btn-poi:hover {
+            background: #6c3483;
+        }
 
-        /* Cache lijst */
-        .cache-list { margin-top: 8px; max-height: 80px; overflow-y: auto; border-top: 1px solid #333; padding-top: 6px; font-size: 12px; }
-        .cache-item { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; border-bottom: 1px solid #2a2a2a; }
-        .cache-item .del-btn { background: none; border: none; color: #e67e22; cursor: pointer; font-weight: 700; font-size: 14px; padding: 0 4px; }
-        .cache-item .coords-text { font-family: monospace; font-size: 10px; color: #888; }
-        .no-caches { color: #777; font-size: 11px; text-align: center; padding: 6px 0; }
+        .cache-list {
+            margin-top: 8px;
+            max-height: 80px;
+            overflow-y: auto;
+            border-top: 1px solid #333;
+            padding-top: 6px;
+            font-size: 12px;
+        }
+        .cache-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        .cache-item .del-btn {
+            background: none;
+            border: none;
+            color: #e67e22;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 0 4px;
+        }
+        .cache-item .coords-text {
+            font-family: monospace;
+            font-size: 10px;
+            color: #888;
+        }
+        .no-caches {
+            color: #777;
+            font-size: 11px;
+            text-align: center;
+            padding: 6px 0;
+        }
 
-        /* Stad toevoegen */
-        .stad-toevoeg { display: none; margin-top: 8px; border-top: 1px solid #333; padding-top: 8px; }
-        .stad-toevoeg.show { display: block; }
+        .stad-toevoeg {
+            display: none;
+            margin-top: 8px;
+            border-top: 1px solid #333;
+            padding-top: 8px;
+        }
+        .stad-toevoeg.show {
+            display: block;
+        }
         .stad-toevoeg input {
-            width: 100%; padding: 6px 10px; border-radius: 8px; border: 1px solid #444;
-            background: #1a1a1a; color: #eee; font-size: 13px; margin-bottom: 4px;
+            width: 100%;
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            color: #eee;
+            font-size: 13px;
+            margin-bottom: 4px;
         }
-        .stad-toevoeg input:focus { border-color: #f0d080; }
+        .stad-toevoeg input:focus {
+            border-color: #f0d080;
+        }
+
+        /* POI toevoeg formulier in menu */
+        .poi-toevoeg {
+            display: none;
+            margin-top: 8px;
+            border-top: 1px solid #333;
+            padding-top: 8px;
+        }
+        .poi-toevoeg.show {
+            display: block;
+        }
+        .poi-toevoeg input,
+        .poi-toevoeg select {
+            width: 100%;
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            color: #eee;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        .poi-toevoeg select option {
+            background: #1a1a1a;
+        }
 
         /* Upload routes */
-        #uploadedRoutesContainer { transition: all 0.2s; }
-        #uploadedRoutesContainer.open { display: block !important; }
         .upload-route-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 2px 0; border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 0;
+            border-bottom: 1px solid #333;
         }
         .upload-route-item label {
-            display: flex; align-items: center; gap: 4px; font-size: 11px; color: #ccc; cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #ccc;
+            cursor: pointer;
         }
-        .upload-route-item input[type="checkbox"] { accent-color: #e74c3c; width: 12px; height: 12px; }
-        .upload-route-item .del-btn { background:none; border:none; color:#e67e22; cursor:pointer; font-weight:700; font-size:12px; padding:0 4px; }
+        .upload-route-item input[type="checkbox"] {
+            accent-color: #e74c3c;
+            width: 12px;
+            height: 12px;
+        }
+        .upload-route-item .del-btn {
+            background: none;
+            border: none;
+            color: #e67e22;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 12px;
+            padding: 0 4px;
+        }
 
         /* ---------- CACHE POPUP ---------- */
         #cachePopup {
             display: none;
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
             z-index: 9998;
-            align-items: center; justify-content: center;
+            align-items: center;
+            justify-content: center;
         }
         #cachePopup .popup-box {
-            background: rgba(30,30,30,0.95); backdrop-filter: blur(12px);
-            border-radius: 24px; padding: 28px; max-width: 440px; width: 90%;
-            border: 1px solid rgba(255,215,0,0.2);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 28px;
+            max-width: 440px;
+            width: 90%;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
             color: #eee;
         }
-        #cachePopup .popup-box h3 { color: #f0d080; margin: 0 0 16px; text-align: center; }
+        #cachePopup .popup-box h3 {
+            color: #f0d080;
+            margin: 0 0 16px;
+            text-align: center;
+        }
         #cachePopup .popup-box .coord-row {
-            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
         }
         #cachePopup .popup-box .coord-row label {
-            font-weight: 600; font-size: 14px; color: #ccc; min-width: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #ccc;
+            min-width: 40px;
         }
         #cachePopup .popup-box .coord-row input {
-            flex: 1; padding: 10px 12px; border-radius: 10px; border: 1px solid #444;
-            background: #1a1a1a; color: #eee; font-size: 14px; transition: 0.2s;
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            color: #eee;
+            font-size: 14px;
+            transition: 0.2s;
         }
-        #cachePopup .popup-box .coord-row input:focus { outline: none; border-color: #f0d080; }
+        #cachePopup .popup-box .coord-row input:focus {
+            outline: none;
+            border-color: #f0d080;
+        }
         #cachePopup .popup-box .coord-actions {
-            display: flex; gap: 8px; margin-top: 16px;
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
         }
         #cachePopup .popup-box .coord-actions button {
-            padding: 12px; border: none; border-radius: 40px;
-            font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.15s ease;
+            padding: 12px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.15s ease;
         }
-        #cachePopup .popup-box .coord-actions button.btn-add { flex: 2; background: #2c5a47; color: white; }
-        #cachePopup .popup-box .coord-actions button.btn-add:hover { background: #1d4032; }
-        #cachePopup .popup-box .coord-actions button.btn-clear { flex: 1; background: #5a4a3a; color: white; }
-        #cachePopup .popup-box .coord-actions button.btn-clear:hover { background: #4a3a2a; }
-        #cachePopup .popup-box .coord-actions button.btn-map { flex: 1; background: #4a6a8a; color: white; }
-        #cachePopup .popup-box .coord-actions button.btn-map:hover { background: #3a5a7a; }
+        #cachePopup .popup-box .coord-actions button.btn-add {
+            flex: 2;
+            background: #2c5a47;
+            color: white;
+        }
+        #cachePopup .popup-box .coord-actions button.btn-add:hover {
+            background: #1d4032;
+        }
+        #cachePopup .popup-box .coord-actions button.btn-clear {
+            flex: 1;
+            background: #5a4a3a;
+            color: white;
+        }
+        #cachePopup .popup-box .coord-actions button.btn-clear:hover {
+            background: #4a3a2a;
+        }
+        #cachePopup .popup-box .coord-actions button.btn-map {
+            flex: 1;
+            background: #4a6a8a;
+            color: white;
+        }
+        #cachePopup .popup-box .coord-actions button.btn-map:hover {
+            background: #3a5a7a;
+        }
+
+        /* ---------- POI POPUP (toevoegen) ---------- */
+        #poiPopup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            z-index: 9998;
+            align-items: center;
+            justify-content: center;
+        }
+        #poiPopup .popup-box {
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 28px;
+            max-width: 440px;
+            width: 90%;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            color: #eee;
+        }
+        #poiPopup .popup-box h3 {
+            color: #f0d080;
+            margin: 0 0 16px;
+            text-align: center;
+        }
+        #poiPopup .popup-box .coord-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        #poiPopup .popup-box .coord-row label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #ccc;
+            min-width: 50px;
+        }
+        #poiPopup .popup-box .coord-row input,
+        #poiPopup .popup-box .coord-row select {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            color: #eee;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        #poiPopup .popup-box .coord-row input:focus,
+        #poiPopup .popup-box .coord-row select:focus {
+            outline: none;
+            border-color: #f0d080;
+        }
+        #poiPopup .popup-box .coord-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        #poiPopup .popup-box .coord-actions button {
+            padding: 12px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.15s ease;
+        }
+        #poiPopup .popup-box .coord-actions button.btn-add {
+            flex: 2;
+            background: #8e44ad;
+            color: white;
+        }
+        #poiPopup .popup-box .coord-actions button.btn-add:hover {
+            background: #6c3483;
+        }
+        #poiPopup .popup-box .coord-actions button.btn-clear {
+            flex: 1;
+            background: #5a4a3a;
+            color: white;
+        }
+        #poiPopup .popup-box .coord-actions button.btn-clear:hover {
+            background: #4a3a2a;
+        }
 
         /* ---------- WALKIE-TALKIE MODAL ---------- */
         #wtModal {
             display: none;
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
             z-index: 9997;
-            align-items: center; justify-content: center;
+            align-items: center;
+            justify-content: center;
         }
         #wtModal .wt-box {
-            background: rgba(20,20,20,0.95); backdrop-filter: blur(12px);
-            border-radius: 24px; padding: 20px; max-width: 480px; width: 90%;
-            border: 1px solid rgba(255,215,0,0.2);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 20px;
+            max-width: 480px;
+            width: 90%;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
             color: #eee;
-            max-height: 90vh; overflow-y: auto;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
         }
-        #wtModal .wt-box h3 { color: #f0d080; margin: 0 0 12px; text-align: center; }
+        #wtModal .wt-box h3 {
+            color: #f0d080;
+            margin: 0 0 12px;
+            text-align: center;
+        }
         .wt-status-row {
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 13px; color: #aaa; padding: 4px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #aaa;
+            padding: 4px 0;
         }
         .wt-status-led {
-            display: inline-block; width: 12px; height: 12px; border-radius: 50%;
-            margin-right: 6px; vertical-align: middle;
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
         }
-        .wt-status-led.online { background: #28a745; animation: pulse 1.5s infinite; }
-        .wt-status-led.offline { background: #dc3545; animation: none; }
-        .wt-status-led.connecting { background: #f0c040; animation: pulse 0.5s infinite; }
-        .wt-status-led.speaking { background: #f0c040; animation: pulse 0.3s infinite; }
-        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+        .wt-status-led.online {
+            background: #28a745;
+            animation: pulse 1.5s infinite;
+        }
+        .wt-status-led.offline {
+            background: #dc3545;
+            animation: none;
+        }
+        .wt-status-led.connecting {
+            background: #f0c040;
+            animation: pulse 0.5s infinite;
+        }
+        .wt-status-led.speaking {
+            background: #f0c040;
+            animation: pulse 0.3s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
 
         .wt-user-chips {
-            display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin: 6px 0;
         }
         .wt-user-chip {
-            background: #2a2a2a; padding: 2px 10px 2px 6px; border-radius: 14px;
-            font-size: 12px; display: inline-flex; align-items: center; gap: 4px;
+            background: #2a2a2a;
+            padding: 2px 10px 2px 6px;
+            border-radius: 14px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             border: 1px solid #444;
         }
-        .wt-user-chip.self { border-color: #f0c040; }
+        .wt-user-chip.self {
+            border-color: #f0c040;
+        }
 
         .ptt-btn {
-            width: 100%; padding: 16px; border: none; border-radius: 20px;
-            font-weight: 700; font-size: 18px; cursor: pointer; transition: 0.2s;
-            text-transform: uppercase; letter-spacing: 1px;
-            background: #dc3545; color: white; margin: 8px 0;
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: #dc3545;
+            color: white;
+            margin: 8px 0;
         }
-        .ptt-btn:active, .ptt-btn.active { background: #f0c040; color: #1a1a1a; transform: scale(0.97); }
-        .ptt-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .ptt-btn:active,
+        .ptt-btn.active {
+            background: #f0c040;
+            color: #1a1a1a;
+            transform: scale(0.97);
+        }
+        .ptt-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
 
         .wt-chat-box {
-            max-height: 120px; overflow-y: auto; font-size: 13px;
-            background: #0a0a0a; border-radius: 12px; padding: 6px 8px;
-            margin: 8px 0; border: 1px solid #333;
+            max-height: 120px;
+            overflow-y: auto;
+            font-size: 13px;
+            background: #0a0a0a;
+            border-radius: 12px;
+            padding: 6px 8px;
+            margin: 8px 0;
+            border: 1px solid #333;
         }
-        .wt-chat-box .msg { padding: 2px 4px; border-bottom: 1px solid #1a1a1a; }
-        .wt-chat-box .msg .sender { font-weight: 600; color: #88ccff; }
-        .wt-chat-box .msg .time { color: #667788; font-size: 10px; margin-left: 6px; }
+        .wt-chat-box .msg {
+            padding: 2px 4px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .wt-chat-box .msg .sender {
+            font-weight: 600;
+            color: #88ccff;
+        }
+        .wt-chat-box .msg .time {
+            color: #667788;
+            font-size: 10px;
+            margin-left: 6px;
+        }
 
         .wt-input-row {
-            display: flex; gap: 6px; margin-top: 6px;
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
         }
         .wt-input-row input {
-            flex: 1; padding: 8px 12px; border-radius: 10px; border: 1px solid #444;
-            background: #0a0a0a; color: #eee; font-size: 14px;
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            background: #0a0a0a;
+            color: #eee;
+            font-size: 14px;
         }
-        .wt-input-row input:focus { border-color: #f0c040; outline: none; }
+        .wt-input-row input:focus {
+            border-color: #f0c040;
+            outline: none;
+        }
         .wt-input-row button {
-            padding: 8px 16px; border: none; border-radius: 10px;
-            background: #4a90d9; color: white; font-weight: 600; cursor: pointer;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 10px;
+            background: #4a90d9;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
         }
-        .wt-input-row button:hover { background: #357abd; }
+        .wt-input-row button:hover {
+            background: #357abd;
+        }
         .wt-close-btn {
-            position: absolute; top: 10px; right: 16px;
-            background: none; border: none; color: #aaa; font-size: 24px; cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 24px;
+            cursor: pointer;
         }
-        .wt-close-btn:hover { color: #fff; }
+        .wt-close-btn:hover {
+            color: #fff;
+        }
 
         /* ---------- WALKIE KNOP (zwevend) ---------- */
         #wtToggleBtn {
-            position: absolute; bottom: 30px; right: 30px; z-index: 1001;
-            background: #2c5a47; padding: 16px 20px; border-radius: 60px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: none;
-            font-size: 24px; cursor: pointer; color: white; transition: 0.2s;
-            display: flex; align-items: center; gap: 6px; font-weight: 600;
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1001;
+            background: #2c5a47;
+            padding: 16px 20px;
+            border-radius: 60px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: white;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
         }
-        #wtToggleBtn:hover { background: #1d4032; transform: scale(1.05); }
+        #wtToggleBtn:hover {
+            background: #1d4032;
+            transform: scale(1.05);
+        }
         #wtToggleBtn .badge {
-            background: #dc3545; border-radius: 50%; padding: 2px 8px;
-            font-size: 12px; font-weight: 700; color: white;
+            background: #dc3545;
+            border-radius: 50%;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
         }
 
         /* ---------- LEGENDE ---------- */
         .legende-badge {
-            position: absolute; bottom: 100px; left: 20px; z-index: 1000;
-            background: rgba(20,20,20,0.9); backdrop-filter: blur(6px);
-            padding: 10px 14px; border-radius: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            font-size: 11px; border-left: 6px solid #8e44ad; color: #ddd;
-            display: flex; flex-wrap: wrap; gap: 4px 12px;
+            position: absolute;
+            bottom: 100px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(20, 20, 20, 0.9);
+            backdrop-filter: blur(6px);
+            padding: 10px 14px;
+            border-radius: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            font-size: 11px;
+            border-left: 6px solid #8e44ad;
+            color: #ddd;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 12px;
         }
-        .legende-badge .dot { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 4px; }
-        .legende-badge .dot.romeins { background: #1d6b4c; }
-        .legende-badge .dot.honderd { background: #b34b2e; }
-        .legende-badge .dot.woi { background: #5f6b7a; }
-        .legende-badge .dot.revolutie { background: #8e44ad; }
-        .legende-badge .dot.groep { background: #2c5a47; }
-        .legende-badge .dot.kml { background: #e74c3c; }
+        .legende-badge .dot {
+            display: inline-block;
+            width: 11px;
+            height: 11px;
+            border-radius: 3px;
+            margin-right: 4px;
+        }
+        .legende-badge .dot.romeins {
+            background: #ff6b6b;
+        }
+        .legende-badge .dot.honderd {
+            background: #ffd93d;
+        }
+        .legende-badge .dot.woi {
+            background: #6bcbff;
+        }
+        .legende-badge .dot.revolutie {
+            background: #b388ff;
+        }
+        .legende-badge .dot.groep {
+            background: #2c5a47;
+        }
+        .legende-badge .dot.kml {
+            background: #e74c3c;
+        }
 
         /* ---------- LOCATIE KNOP ---------- */
         #locateBtn {
-            position: absolute; bottom: 30px; left: 30px; z-index: 1000;
-            background: #2c5a47; padding: 12px 16px; border-radius: 60px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: none;
-            font-size: 18px; cursor: pointer; color: white; transition: 0.2s;
-            display: none; align-items: center; gap: 6px; font-weight: 600;
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            z-index: 1000;
+            background: #2c5a47;
+            padding: 12px 16px;
+            border-radius: 60px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: white;
+            transition: 0.2s;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
         }
-        #locateBtn:hover { background: #1d4032; transform: scale(1.05); }
+        #locateBtn:hover {
+            background: #1d4032;
+            transform: scale(1.05);
+        }
 
         /* ---------- RESPONSIVE ---------- */
         @media (max-width: 640px) {
-            .coord-panel { top: 10px; left: 10px; right: 10px; min-width: auto; max-width: none; padding: 12px; }
-            .coord-actions button { font-size: 11px; padding: 6px 10px; }
-            .login-box { padding: 24px 20px; }
-            .login-box h1 { font-size: 22px; }
-            .legende-badge { bottom: 85px; left: 10px; font-size: 10px; padding: 6px 10px; }
-            #locateBtn { bottom: 16px; left: 16px; padding: 8px 12px; font-size: 16px; }
-            #wtToggleBtn { bottom: 16px; right: 16px; padding: 12px 16px; font-size: 20px; }
-            #wtModal .wt-box { padding: 16px; }
+            #popupMenu {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                min-width: auto;
+                max-width: none;
+            }
+            #popupMenu .menu-body {
+                padding: 8px 12px 12px;
+            }
+            .menu-header {
+                padding: 10px 12px;
+            }
+            .coord-actions button {
+                font-size: 11px;
+                padding: 6px 10px;
+            }
+            .login-box {
+                padding: 24px 20px;
+            }
+            .login-box h1 {
+                font-size: 22px;
+            }
+            .legende-badge {
+                bottom: 85px;
+                left: 10px;
+                font-size: 10px;
+                padding: 6px 10px;
+            }
+            #locateBtn {
+                bottom: 16px;
+                left: 16px;
+                padding: 8px 12px;
+                font-size: 16px;
+            }
+            #wtToggleBtn {
+                bottom: 16px;
+                right: 16px;
+                padding: 12px 16px;
+                font-size: 20px;
+            }
+            #wtModal .wt-box {
+                padding: 16px;
+            }
         }
     </style>
 </head>
@@ -318,78 +981,85 @@
     <!-- KAART -->
     <div id="map"></div>
 
-    <!-- COÖRDINATEN PANEEL -->
-    <div class="coord-panel" id="coordPanel" style="display:none;">
-        <h3>
-            <span>📍 Groepscache</span>
-            <span class="user-badge" id="userBadge">👤</span>
-        </h3>
-
-        <div style="display:flex; gap:6px; margin-bottom:8px;">
-            <button class="btn-add" onclick="openCachePopup()" style="flex:1; padding:10px;">📦 Nieuwe cache</button>
-            <button class="btn-logout" onclick="logout()" style="flex:0.5;">🚪 Uit</button>
-        </div>
-
-        <!-- Stadskeuze -->
-        <select class="stad-selector" id="stadSelector" onchange="wisselStad(this.value)"></select>
-
-        <!-- Upload routes -->
-        <div style="margin:6px 0 4px;">
-            <input type="file" id="routeUpload" accept=".gpx,.kml,.csv" style="display:none;" onchange="verwerkUpload(event)" />
-            <button class="btn-stad" onclick="document.getElementById('routeUpload').click()" style="width:100%; padding:8px;">
-                📤 Upload route (GPX/KML/CSV)
-            </button>
-        </div>
-
-        <!-- Uitklapmenu geüploade routes -->
-        <div style="margin-top:4px; border-top:1px solid #333;">
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; cursor:pointer;" onclick="toggleRouteMenu()">
-                <span style="font-size:12px; font-weight:600; color:#ccc;">📂 Geüploade routes</span>
-                <span id="routeMenuToggle" style="font-size:12px; color:#888;">▶</span>
+    <!-- POPUP MENU (inklapsysteem met pijltje) -->
+    <div id="popupMenu" style="display:none;">
+        <div class="menu-header" id="menuHeader">
+            <div class="title">
+                📍 Groepscache
+                <span class="user-badge" id="userBadge">👤</span>
             </div>
-            <div id="uploadedRoutesContainer" style="display:none; padding:4px 0; max-height:120px; overflow-y:auto;">
-                <div id="uploadedRoutesList">
-                    <div class="no-caches">Geen routes geüpload</div>
+            <div class="controls">
+                <button class="minmax-btn" id="minmaxBtn" title="Minimaliseren / maximaliseren">🗕</button>
+                <button class="toggle-btn" id="toggleBtn" title="In-/uitklappen">◀</button>
+            </div>
+        </div>
+        <div class="menu-body" id="menuBody">
+            <!-- Knoppen bovenin -->
+            <div style="display:flex; gap:6px; margin-bottom:8px;">
+                <button class="btn-add" onclick="openCachePopup()" style="flex:1; padding:10px;">📦 Nieuwe cache</button>
+                <button class="btn-poi" onclick="openPoiPopup()" style="flex:1; padding:10px;">🏛️ Bezienswaardigheid</button>
+                <button class="btn-logout" onclick="logout()" style="flex:0.5;">🚪</button>
+            </div>
+
+            <!-- Stadskeuze -->
+            <select class="stad-selector" id="stadSelector" onchange="wisselStad(this.value)"></select>
+
+            <!-- Upload routes -->
+            <div style="margin:6px 0 4px;">
+                <input type="file" id="routeUpload" accept=".gpx,.kml,.csv" style="display:none;" onchange="verwerkUpload(event)" />
+                <button class="btn-stad" onclick="document.getElementById('routeUpload').click()" style="width:100%; padding:8px;">
+                    📤 Upload route (GPX/KML/CSV)
+                </button>
+            </div>
+            <div style="margin-top:4px; border-top:1px solid #333;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; cursor:pointer;" onclick="toggleRouteMenu()">
+                    <span style="font-size:12px; font-weight:600; color:#ccc;">📂 Geüploade routes</span>
+                    <span id="routeMenuToggle" style="font-size:12px; color:#888;">▶</span>
+                </div>
+                <div id="uploadedRoutesContainer" style="display:none; padding:4px 0; max-height:120px; overflow-y:auto;">
+                    <div id="uploadedRoutesList">
+                        <div class="no-caches">Geen routes geüpload</div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- KML Track toggle -->
-        <div style="display:flex; gap:8px; margin-bottom:8px; background:#1a1a1a; padding:4px 8px; border-radius:8px; border:1px solid #333;">
-            <label style="display:flex; align-items:center; gap:4px; font-size:12px; font-weight:500; color:#ccc; cursor:pointer;">
-                <input type="checkbox" id="toggleKML" checked onchange="toggleKMLTrack(this.checked)" />
-                🚵 Abbeville KML-track
-            </label>
-        </div>
-
-        <!-- Thema toggles -->
-        <div class="thema-toggles" id="themaToggles">
-            <label><input type="checkbox" id="toggleRomeins" checked onchange="setStippel('romeins', this.checked)" /> Romeins</label>
-            <label><input type="checkbox" id="toggleHonderd" checked onchange="setStippel('honderd', this.checked)" /> 100-jarig</label>
-            <label><input type="checkbox" id="toggleWOI" checked onchange="setStippel('woi', this.checked)" /> WO I</label>
-            <label><input type="checkbox" id="toggleRevolutie" checked onchange="setStippel('revolutie', this.checked)" /> Revolutie</label>
-        </div>
-
-        <!-- Stad toevoegen -->
-        <div style="display:flex; gap:4px; margin-bottom:6px;">
-            <button class="btn-stad" onclick="toggleStadToevoeg()" style="flex:1;">➕ Stad toevoegen</button>
-        </div>
-        <div class="stad-toevoeg" id="stadToevoegForm">
-            <input type="text" id="stadNaam" placeholder="Stadsnaam" />
-            <div style="display:flex; gap:4px;">
-                <input type="text" id="stadLat" placeholder="Lat (bijv. 49.8945)" style="flex:1;" />
-                <input type="text" id="stadLng" placeholder="Lng (bijv. 2.2990)" style="flex:1;" />
+            <!-- KML Track toggle -->
+            <div style="display:flex; gap:8px; margin-bottom:8px; background:#1a1a1a; padding:4px 8px; border-radius:8px; border:1px solid #333;">
+                <label style="display:flex; align-items:center; gap:4px; font-size:12px; font-weight:500; color:#ccc; cursor:pointer;">
+                    <input type="checkbox" id="toggleKML" checked onchange="toggleKMLTrack(this.checked)" />
+                    🚵 KML-track
+                </label>
             </div>
-            <input type="number" id="stadZoom" placeholder="Zoom (bijv. 14)" value="14" />
-            <div class="coord-actions">
-                <button class="btn-add" onclick="voegStadToe()">➕ Toevoegen</button>
-                <button class="btn-clear" onclick="toggleStadToevoeg()">Annuleer</button>
-            </div>
-        </div>
 
-        <!-- CACHE LIJST -->
-        <div class="cache-list" id="cacheList">
-            <div class="no-caches">📡 Wacht op data...</div>
+            <!-- Thema toggles -->
+            <div class="thema-toggles" id="themaToggles">
+                <label><input type="checkbox" id="toggleRomeins" checked onchange="setStippel('romeins', this.checked)" /> Romeins</label>
+                <label><input type="checkbox" id="toggleHonderd" checked onchange="setStippel('honderd', this.checked)" /> 100-jarig</label>
+                <label><input type="checkbox" id="toggleWOI" checked onchange="setStippel('woi', this.checked)" /> WO I</label>
+                <label><input type="checkbox" id="toggleRevolutie" checked onchange="setStippel('revolutie', this.checked)" /> Revolutie</label>
+            </div>
+
+            <!-- Stad toevoegen -->
+            <div style="display:flex; gap:4px; margin-bottom:6px;">
+                <button class="btn-stad" onclick="toggleStadToevoeg()" style="flex:1;">➕ Stad toevoegen</button>
+            </div>
+            <div class="stad-toevoeg" id="stadToevoegForm">
+                <input type="text" id="stadNaam" placeholder="Stadsnaam" />
+                <div style="display:flex; gap:4px;">
+                    <input type="text" id="stadLat" placeholder="Lat (bijv. 49.8945)" style="flex:1;" />
+                    <input type="text" id="stadLng" placeholder="Lng (bijv. 2.2990)" style="flex:1;" />
+                </div>
+                <input type="number" id="stadZoom" placeholder="Zoom (bijv. 14)" value="14" />
+                <div class="coord-actions">
+                    <button class="btn-add" onclick="voegStadToe()">➕ Toevoegen</button>
+                    <button class="btn-clear" onclick="toggleStadToevoeg()">Annuleer</button>
+                </div>
+            </div>
+
+            <!-- CACHE LIJST -->
+            <div class="cache-list" id="cacheList">
+                <div class="no-caches">📡 Wacht op data...</div>
+            </div>
         </div>
     </div>
 
@@ -415,8 +1085,45 @@
             </div>
             <div class="coord-actions">
                 <button class="btn-add" onclick="voegPopupCacheToe()">➕ Toevoegen</button>
-                <button class="btn-map" onclick="kiesOpKaart()">📍 Kies op kaart</button>
+                <button class="btn-map" onclick="kiesOpKaart('cache')">📍 Kies op kaart</button>
                 <button class="btn-clear" onclick="sluitCachePopup()">Annuleer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- POP-UP VOOR BEZIENSWAARDIGHEID TOEVOEGEN -->
+    <div id="poiPopup">
+        <div class="popup-box">
+            <h3>🏛️ Bezienswaardigheid toevoegen</h3>
+            <div class="coord-row">
+                <label>📛 Naam</label>
+                <input type="text" id="poiNaam" placeholder="Naam" />
+            </div>
+            <div class="coord-row">
+                <label>📄 Beschrijving</label>
+                <input type="text" id="poiBeschrijving" placeholder="Beschrijving" />
+            </div>
+            <div class="coord-row">
+                <label>🎨 Thema</label>
+                <select id="poiThema">
+                    <option value="romeins">Romeins</option>
+                    <option value="honderd">100-jarig</option>
+                    <option value="woi">WO I</option>
+                    <option value="revolutie">Revolutie</option>
+                </select>
+            </div>
+            <div class="coord-row">
+                <label>🌐 Lat</label>
+                <input type="text" id="poiLat" placeholder="Bijv. 50.1065" />
+            </div>
+            <div class="coord-row">
+                <label>🌐 Lng</label>
+                <input type="text" id="poiLng" placeholder="Bijv. 1.8325" />
+            </div>
+            <div class="coord-actions">
+                <button class="btn-add" onclick="voegPoiToe()">➕ Toevoegen</button>
+                <button class="btn-map" onclick="kiesOpKaart('poi')">📍 Kies op kaart</button>
+                <button class="btn-clear" onclick="sluitPoiPopup()">Annuleer</button>
             </div>
         </div>
     </div>
@@ -465,9 +1172,12 @@
     </button>
 
     <!-- LEAFLET & FIREBASE & PEERJS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
+    </script>
 
     <script>
         // ============================================================
@@ -489,7 +1199,7 @@
         // GLOBALE VARIABELEN
         // ============================================================
         let huidigeGebruiker = '';
-        let rol = 'deelnemer'; // 'leider' of 'deelnemer'
+        let rol = 'deelnemer';
         let alleMarkers = {};
         let groepsCaches = {};
         let userMarker = null;
@@ -512,295 +1222,825 @@
             revolutie: true
         };
 
-        // ============================================================
-        // BEZIENSWAARDIGHEDEN (POI's)
-        // ============================================================
-        const poiData = [
+        // Bezienswaardigheden (POI's) - initieel uit hardcoded data + later uit Firebase
+        let poiData = [
             // Abbeville
-            { stad: 'abbeville', thema: 'romeins', lat: 50.1065, lng: 1.8325, naam: 'Romeinse nederzetting', beschrijving: 'Sporen van een Gallo-Romeinse villa.' },
-            { stad: 'abbeville', thema: 'honderd', lat: 50.1040, lng: 1.8290, naam: 'Honderdjarige Oorlog – slagveld', beschrijving: 'Locatie van een schermutseling uit de Honderdjarige Oorlog.' },
-            { stad: 'abbeville', thema: 'woi', lat: 50.1070, lng: 1.8305, naam: 'WOI-loopgraven', beschrijving: 'Restanten van Duitse loopgraven uit de Eerste Wereldoorlog.' },
-            { stad: 'abbeville', thema: 'revolutie', lat: 50.1035, lng: 1.8275, naam: 'Revolutieplein', beschrijving: 'Hier vonden bijeenkomsten plaats tijdens de Franse Revolutie.' },
+            { stad: 'abbeville', thema: 'romeins', lat: 50.1065, lng: 1.8325, naam: 'Romeinse nederzetting',
+                beschrijving: 'Sporen van een Gallo-Romeinse villa.' },
+            { stad: 'abbeville', thema: 'honderd', lat: 50.1040, lng: 1.8290, naam: 'Honderdjarige Oorlog – slagveld',
+                beschrijving: 'Locatie van een schermutseling uit de Honderdjarige Oorlog.' },
+            { stad: 'abbeville', thema: 'woi', lat: 50.1070, lng: 1.8305, naam: 'WOI-loopgraven',
+                beschrijving: 'Restanten van Duitse loopgraven uit de Eerste Wereldoorlog.' },
+            { stad: 'abbeville', thema: 'revolutie', lat: 50.1035, lng: 1.8275, naam: 'Revolutieplein',
+                beschrijving: 'Hier vonden bijeenkomsten plaats tijdens de Franse Revolutie.' },
             // Amiens
-            { stad: 'amiens', thema: 'romeins', lat: 49.8950, lng: 2.3000, naam: 'Romeins aquaduct', beschrijving: 'Overblijfselen van een Romeins aquaduct.' },
-            { stad: 'amiens', thema: 'honderd', lat: 49.8920, lng: 2.3050, naam: 'Burcht uit de Honderdjarige Oorlog', beschrijving: 'Versterkt kasteel uit de 14e eeuw.' },
-            { stad: 'amiens', temaa: 'woi', lat: 49.8900, lng: 2.2950, naam: 'WOI-ziekenhuis', beschrijving: 'Voormalig veldhospitaal uit 1916.' },
-            { stad: 'amiens', thema: 'revolutie', lat: 49.8970, lng: 2.3010, naam: 'Guillotineplaats', beschrijving: 'Plaats waar tijdens de Revolutie executies plaatsvonden.' },
+            { stad: 'amiens', thema: 'romeins', lat: 49.8950, lng: 2.3000, naam: 'Romeins aquaduct',
+                beschrijving: 'Overblijfselen van een Romeins aquaduct.' },
+            { stad: 'amiens', thema: 'honderd', lat: 49.8920, lng: 2.3050, naam: 'Burcht uit de Honderdjarige Oorlog',
+                beschrijving: 'Versterkt kasteel uit de 14e eeuw.' },
+            { stad: 'amiens', thema: 'woi', lat: 49.8900, lng: 2.2950, naam: 'WOI-ziekenhuis',
+                beschrijving: 'Voormalig veldhospitaal uit 1916.' },
+            { stad: 'amiens', thema: 'revolutie', lat: 49.8970, lng: 2.3010, naam: 'Guillotineplaats',
+                beschrijving: 'Plaats waar tijdens de Revolutie executies plaatsvonden.' },
             // Arras
-            { stad: 'arras', thema: 'romeins', lat: 50.2900, lng: 2.7780, naam: 'Romeinse weg', beschrijving: 'Oude Romeinse heerweg.' },
-            { stad: 'arras', thema: 'honderd', lat: 50.2920, lng: 2.7760, naam: 'Slag bij Arras (1415)', beschrijving: 'Herdenkingsplaats van de slag.' },
-            { stad: 'arras', thema: 'woi', lat: 50.2880, lng: 2.7800, naam: 'WOI-kerkhof', beschrijving: 'Brits oorlogskerkhof.' },
-            { stad: 'arras', thema: 'revolutie', lat: 50.2930, lng: 2.7740, naam: 'Revolutiekerk', beschrijving: 'Kerk die diende als revolutionair vergaderlokaal.' }
+            { stad: 'arras', thema: 'romeins', lat: 50.2900, lng: 2.7780, naam: 'Romeinse weg',
+                beschrijving: 'Oude Romeinse heerweg.' },
+            { stad: 'arras', thema: 'honderd', lat: 50.2920, lng: 2.7760, naam: 'Slag bij Arras (1415)',
+                beschrijving: 'Herdenkingsplaats van de slag.' },
+            { stad: 'arras', thema: 'woi', lat: 50.2880, lng: 2.7800, naam: 'WOI-kerkhof',
+                beschrijving: 'Brits oorlogskerkhof.' },
+            { stad: 'arras', thema: 'revolutie', lat: 50.2930, lng: 2.7740, naam: 'Revolutiekerk',
+                beschrijving: 'Kerk die diende als revolutionair vergaderlokaal.' }
         ];
 
         // ============================================================
         // KML-COÖRDINATEN (Abbeville track)
         // ============================================================
         const kmlCoordinaten = [
-            [50.109197, 1.828051], [50.109147, 1.828052], [50.109082, 1.828074],
-            [50.109006, 1.828129], [50.108934, 1.828151], [50.108867, 1.828153],
-            [50.108830, 1.828043], [50.108853, 1.827980], [50.108880, 1.827919],
-            [50.108901, 1.827854], [50.108910, 1.827718], [50.108893, 1.827637],
-            [50.108880, 1.827516], [50.108858, 1.827384], [50.108843, 1.827310],
-            [50.108824, 1.827241], [50.108808, 1.827171], [50.108764, 1.827041],
-            [50.108741, 1.826978], [50.108723, 1.826906], [50.108694, 1.826833],
-            [50.108675, 1.826759], [50.108653, 1.826681], [50.108624, 1.826623],
-            [50.108576, 1.826506], [50.108554, 1.826374], [50.108536, 1.826280],
-            [50.108567, 1.826200], [50.108640, 1.826177], [50.108730, 1.826121],
-            [50.108781, 1.826098], [50.108831, 1.826081], [50.108872, 1.826046],
-            [50.108918, 1.826022], [50.108971, 1.826003], [50.109035, 1.825973],
-            [50.109051, 1.825881], [50.109030, 1.825769], [50.109007, 1.825632],
-            [50.108997, 1.825562], [50.108990, 1.825433], [50.109017, 1.825377],
-            [50.109063, 1.825340], [50.109117, 1.825319], [50.109178, 1.825283],
-            [50.109230, 1.825249], [50.109287, 1.825210], [50.109340, 1.825174],
-            [50.109396, 1.825137], [50.109454, 1.825100], [50.109510, 1.825066],
-            [50.109563, 1.825026], [50.109618, 1.824990], [50.109666, 1.824954],
-            [50.109714, 1.824930], [50.109761, 1.824903], [50.109821, 1.824854],
-            [50.109872, 1.824815], [50.109923, 1.824782], [50.109972, 1.824759],
-            [50.110022, 1.824726], [50.110071, 1.824690], [50.110130, 1.824657],
-            [50.110186, 1.824621], [50.110241, 1.824583], [50.110296, 1.824550],
-            [50.110349, 1.824525], [50.110407, 1.824495], [50.110470, 1.824460],
-            [50.110533, 1.824427], [50.110591, 1.824393], [50.110650, 1.824366],
-            [50.110712, 1.824340], [50.110775, 1.824302], [50.110831, 1.824271],
-            [50.110892, 1.824236], [50.110953, 1.824216], [50.111013, 1.824192],
-            [50.111079, 1.824156], [50.111141, 1.824127], [50.111207, 1.824102],
-            [50.111271, 1.824068], [50.111334, 1.824043], [50.111394, 1.824016],
-            [50.111456, 1.823985], [50.111516, 1.823958], [50.111575, 1.823943],
-            [50.111675, 1.823880], [50.111751, 1.823860], [50.111814, 1.823843],
-            [50.111880, 1.823819], [50.111943, 1.823791], [50.112003, 1.823758],
-            [50.112066, 1.823723], [50.112129, 1.823694], [50.112190, 1.823676],
-            [50.112247, 1.823640], [50.112303, 1.823592], [50.112353, 1.823530],
-            [50.112395, 1.823460], [50.112434, 1.823377], [50.112476, 1.823302],
-            [50.112513, 1.823226], [50.112536, 1.823127], [50.112550, 1.823023],
-            [50.112566, 1.822922], [50.112580, 1.822818], [50.112590, 1.822715],
-            [50.112597, 1.822614], [50.112602, 1.822510], [50.112599, 1.822409],
-            [50.112591, 1.822309], [50.112581, 1.822207], [50.112567, 1.822106],
-            [50.112546, 1.822007], [50.112519, 1.821912], [50.112491, 1.821822],
-            [50.112461, 1.821729], [50.112432, 1.821640], [50.112400, 1.821545],
-            [50.112366, 1.821452], [50.112335, 1.821358], [50.112301, 1.821262],
-            [50.112266, 1.821172], [50.112236, 1.821083], [50.112202, 1.820990],
-            [50.112172, 1.820894], [50.112140, 1.820798], [50.112110, 1.820711],
-            [50.112079, 1.820615], [50.112048, 1.820520], [50.112018, 1.820432],
-            [50.111987, 1.820337], [50.111959, 1.820241], [50.111934, 1.820148],
-            [50.111912, 1.820050], [50.111886, 1.819956], [50.111862, 1.819860],
-            [50.111844, 1.819760], [50.111823, 1.819664], [50.111803, 1.819564],
-            [50.111782, 1.819467], [50.111759, 1.819379], [50.111734, 1.819283],
-            [50.111711, 1.819199], [50.111688, 1.819115], [50.111666, 1.819027],
-            [50.111645, 1.818937], [50.111624, 1.818862], [50.111594, 1.818780],
-            [50.111573, 1.818705], [50.111561, 1.818630], [50.111544, 1.818556],
-            [50.111509, 1.818461], [50.111432, 1.818525], [50.111348, 1.818609],
-            [50.111299, 1.818632], [50.111242, 1.818661], [50.111191, 1.818690],
-            [50.111130, 1.818742], [50.111075, 1.818778], [50.111025, 1.818817],
-            [50.110966, 1.818869], [50.110912, 1.818916], [50.110852, 1.818964],
-            [50.110790, 1.819005], [50.110728, 1.819049], [50.110670, 1.819117],
-            [50.110620, 1.819155], [50.110549, 1.819159], [50.110470, 1.819158],
-            [50.110415, 1.819191], [50.110357, 1.819229], [50.110297, 1.819267],
-            [50.110244, 1.819294], [50.110188, 1.819330], [50.110133, 1.819365],
-            [50.110082, 1.819397], [50.110021, 1.819433], [50.109966, 1.819469],
-            [50.109909, 1.819510], [50.109847, 1.819541], [50.109787, 1.819577],
-            [50.109727, 1.819609], [50.109664, 1.819647], [50.109605, 1.819685],
-            [50.109540, 1.819727], [50.109476, 1.819765], [50.109413, 1.819801],
-            [50.109352, 1.819836], [50.109297, 1.819873], [50.109237, 1.819913],
-            [50.109179, 1.819951], [50.109119, 1.819987], [50.109064, 1.820024],
-            [50.109005, 1.820066], [50.108949, 1.820104], [50.108892, 1.820145],
-            [50.108837, 1.820182], [50.108779, 1.820221], [50.108724, 1.820263],
-            [50.108663, 1.820305], [50.108604, 1.820345], [50.108543, 1.820388],
-            [50.108487, 1.820435], [50.108432, 1.820488], [50.108368, 1.820537],
-            [50.108312, 1.820586], [50.108253, 1.820631], [50.108199, 1.820678],
-            [50.108137, 1.820729], [50.108083, 1.820776], [50.108026, 1.820820],
-            [50.107971, 1.820869], [50.107913, 1.820919], [50.107856, 1.820967],
-            [50.107808, 1.821013], [50.107752, 1.821058], [50.107696, 1.821107],
-            [50.107643, 1.821158], [50.107595, 1.821201], [50.107536, 1.821250],
-            [50.107478, 1.821292], [50.107424, 1.821340], [50.107364, 1.821384],
-            [50.107315, 1.821428], [50.107258, 1.821472], [50.107201, 1.821521],
-            [50.107151, 1.821563], [50.107095, 1.821610], [50.107040, 1.821656],
-            [50.106990, 1.821704], [50.106937, 1.821748], [50.106880, 1.821795],
-            [50.106831, 1.821841], [50.106779, 1.821883], [50.106724, 1.821930],
-            [50.106670, 1.821980], [50.106617, 1.822031], [50.106565, 1.822078],
-            [50.106508, 1.822119], [50.106452, 1.822166], [50.106399, 1.822214],
-            [50.106343, 1.822263], [50.106293, 1.822310], [50.106236, 1.822359],
-            [50.106184, 1.822400], [50.106130, 1.822445], [50.106073, 1.822489],
-            [50.106025, 1.822535], [50.105969, 1.822581], [50.105918, 1.822626],
-            [50.105869, 1.822677], [50.105810, 1.822721], [50.105759, 1.822771],
-            [50.105703, 1.822820], [50.105649, 1.822865], [50.105593, 1.822909],
-            [50.105537, 1.822952], [50.105486, 1.823001], [50.105436, 1.823050],
-            [50.105387, 1.823101], [50.105280, 1.823037], [50.105227, 1.823089],
-            [50.105173, 1.823144], [50.105120, 1.823200], [50.105070, 1.823257],
-            [50.105017, 1.823320], [50.104965, 1.823384], [50.104919, 1.823440],
-            [50.104870, 1.823500], [50.104821, 1.823561], [50.104772, 1.823621],
-            [50.104725, 1.823679], [50.104681, 1.823734], [50.104634, 1.823792],
-            [50.104584, 1.823854], [50.104537, 1.823912], [50.104485, 1.823976],
-            [50.104438, 1.824034], [50.104388, 1.824095], [50.104342, 1.824152],
-            [50.104350, 1.824325], [50.104307, 1.824389], [50.104257, 1.824450],
-            [50.104209, 1.824506], [50.104165, 1.824563], [50.104116, 1.824624],
-            [50.104069, 1.824683], [50.104023, 1.824738], [50.103979, 1.824795],
-            [50.103934, 1.824852], [50.103891, 1.824911], [50.103846, 1.824965],
-            [50.103800, 1.825016], [50.103758, 1.825064], [50.103706, 1.825120],
-            [50.103666, 1.825169], [50.103619, 1.825225], [50.103575, 1.825283],
-            [50.103531, 1.825337], [50.103482, 1.825394], [50.103399, 1.825477],
-            [50.103361, 1.825521], [50.103303, 1.825606], [50.103250, 1.825674],
-            [50.103189, 1.825706], [50.103145, 1.825744], [50.103120, 1.825835],
-            [50.103078, 1.825915], [50.102968, 1.825873], [50.102910, 1.825942],
-            [50.102853, 1.826011], [50.102797, 1.826081], [50.102743, 1.826149],
-            [50.102687, 1.826219], [50.102631, 1.826289], [50.102576, 1.826358],
-            [50.102578, 1.826536], [50.102522, 1.826599], [50.102463, 1.826668],
-            [50.102413, 1.826737], [50.102360, 1.826806], [50.102308, 1.826870],
-            [50.102254, 1.826934], [50.102207, 1.826997], [50.102155, 1.827064],
-            [50.102099, 1.827125], [50.102042, 1.827192], [50.101992, 1.827256],
-            [50.101939, 1.827322], [50.101882, 1.827388], [50.101827, 1.827459],
-            [50.101774, 1.827531], [50.101721, 1.827606], [50.101670, 1.827683],
-            [50.101621, 1.827762], [50.101577, 1.827846], [50.101536, 1.827927],
-            [50.101497, 1.828013], [50.101457, 1.828096], [50.101416, 1.828185],
-            [50.101377, 1.828273], [50.101336, 1.828360], [50.101296, 1.828444],
-            [50.101256, 1.828529], [50.101220, 1.828614], [50.101186, 1.828704],
-            [50.101160, 1.828800], [50.101148, 1.828895], [50.101166, 1.829002],
-            [50.101201, 1.829102], [50.101210, 1.829220], [50.101195, 1.829337],
-            [50.101163, 1.829449], [50.101112, 1.829539], [50.101067, 1.829611],
-            [50.101022, 1.829681], [50.100975, 1.829746], [50.100926, 1.829812],
-            [50.100878, 1.829870], [50.100821, 1.829927], [50.100760, 1.829966],
-            [50.100693, 1.829974], [50.100636, 1.829988], [50.100579, 1.830014],
-            [50.100521, 1.830041], [50.100468, 1.830068], [50.100409, 1.830111],
-            [50.100353, 1.830155], [50.100297, 1.830197], [50.100239, 1.830239],
-            [50.100180, 1.830278], [50.100119, 1.830301], [50.100059, 1.830321],
-            [50.099999, 1.830353], [50.099944, 1.830409], [50.099899, 1.830481],
-            [50.099849, 1.830549], [50.099790, 1.830588], [50.099721, 1.830605],
-            [50.099657, 1.830621], [50.099596, 1.830648], [50.099534, 1.830675],
-            [50.099473, 1.830697], [50.099415, 1.830718], [50.099357, 1.830756],
-            [50.099292, 1.830783], [50.099233, 1.830803], [50.099175, 1.830825],
-            [50.099117, 1.830857], [50.099060, 1.830883], [50.099004, 1.830914],
-            [50.098944, 1.830945], [50.098889, 1.830973], [50.098832, 1.831010],
-            [50.098777, 1.831042], [50.098717, 1.831078], [50.098661, 1.831114],
-            [50.098600, 1.831157], [50.098543, 1.831188], [50.098492, 1.831217],
-            [50.098432, 1.831257], [50.098373, 1.831303], [50.098314, 1.831343],
-            [50.098259, 1.831380], [50.098199, 1.831416], [50.098143, 1.831450],
-            [50.098085, 1.831489], [50.098029, 1.831532], [50.097973, 1.831574],
-            [50.097916, 1.831615], [50.097854, 1.831651], [50.097796, 1.831686],
-            [50.097735, 1.831728], [50.097674, 1.831764], [50.097613, 1.831796],
-            [50.097549, 1.831822], [50.097490, 1.831844], [50.097421, 1.831858],
-            [50.097353, 1.831866], [50.097290, 1.831868], [50.097221, 1.831863],
-            [50.097155, 1.831854], [50.097092, 1.831844], [50.097028, 1.831836],
-            [50.096963, 1.831833], [50.096899, 1.831820], [50.096837, 1.831798],
-            [50.096774, 1.831777], [50.096714, 1.831749], [50.096660, 1.831726],
-            [50.096597, 1.831684], [50.096540, 1.831647], [50.096478, 1.831608],
-            [50.096423, 1.831563], [50.096364, 1.831513], [50.096305, 1.831470],
-            [50.096247, 1.831425], [50.096189, 1.831377], [50.096134, 1.831326],
-            [50.096088, 1.831261], [50.096037, 1.831201], [50.095992, 1.831148],
-            [50.095931, 1.831080], [50.095883, 1.831019], [50.095831, 1.830960],
-            [50.095778, 1.830897], [50.095725, 1.830839], [50.095671, 1.830773],
-            [50.095619, 1.830723], [50.095569, 1.830668], [50.095525, 1.830609],
-            [50.095473, 1.830548], [50.095425, 1.830493], [50.095376, 1.830439],
-            [50.095323, 1.830378], [50.095272, 1.830325], [50.095219, 1.830268],
-            [50.095170, 1.830211], [50.095120, 1.830155], [50.095068, 1.830104],
-            [50.095013, 1.830054], [50.094960, 1.830004], [50.094907, 1.829950],
-            [50.094861, 1.829892], [50.094813, 1.829830], [50.094768, 1.829776],
-            [50.094710, 1.829739], [50.094654, 1.829711], [50.094597, 1.829671],
-            [50.094543, 1.829627], [50.094486, 1.829585], [50.094432, 1.829542],
-            [50.094376, 1.829500], [50.094320, 1.829458], [50.094263, 1.829413],
-            [50.094205, 1.829366], [50.094147, 1.829319], [50.094089, 1.829270],
-            [50.094031, 1.829218], [50.093973, 1.829166], [50.093918, 1.829119],
-            [50.093859, 1.829073], [50.093802, 1.829023], [50.093748, 1.828972],
-            [50.093691, 1.828922], [50.093637, 1.828870], [50.093584, 1.828813],
-            [50.093529, 1.828754], [50.093475, 1.828700], [50.093417, 1.828649],
-            [50.093361, 1.828604], [50.093300, 1.828554], [50.093239, 1.828507],
-            [50.093179, 1.828453], [50.093124, 1.828398], [50.093066, 1.828348],
-            [50.093009, 1.828305], [50.092948, 1.828254], [50.092888, 1.828206],
-            [50.092827, 1.828158], [50.092764, 1.828113], [50.092701, 1.828073],
-            [50.092639, 1.828032], [50.092580, 1.827983], [50.092520, 1.827934],
-            [50.092464, 1.827877], [50.092406, 1.827816], [50.092349, 1.827761],
-            [50.092292, 1.827711], [50.092231, 1.827661], [50.092172, 1.827617],
-            [50.092113, 1.827577], [50.092056, 1.827532], [50.092006, 1.827481],
-            [50.091972, 1.827416], [50.091936, 1.827321], [50.091899, 1.827243],
-            [50.091849, 1.827160], [50.091800, 1.827086], [50.091751, 1.827012],
-            [50.091699, 1.826944], [50.091647, 1.826880], [50.091591, 1.826819],
-            [50.091539, 1.826760], [50.091485, 1.826705], [50.091425, 1.826658],
-            [50.091369, 1.826610], [50.091314, 1.826556], [50.091261, 1.826498],
-            [50.091205, 1.826443], [50.091148, 1.826394], [50.091089, 1.826351],
-            [50.091030, 1.826314], [50.090965, 1.826290], [50.090899, 1.826268],
-            [50.090835, 1.826252], [50.090770, 1.826244], [50.090703, 1.826242],
-            [50.090640, 1.826245], [50.090577, 1.826250], [50.090513, 1.826257],
-            [50.090450, 1.826268], [50.090388, 1.826287], [50.090325, 1.826317],
-            [50.090263, 1.826348], [50.090205, 1.826379], [50.090148, 1.826415],
-            [50.090090, 1.826452], [50.090036, 1.826487], [50.089982, 1.826521],
-            [50.089926, 1.826557], [50.089871, 1.826599], [50.089818, 1.826635],
-            [50.089762, 1.826676], [50.089708, 1.826720], [50.089652, 1.826766],
-            [50.089600, 1.826805], [50.089546, 1.826845], [50.089493, 1.826889],
-            [50.089442, 1.826938], [50.089391, 1.826986], [50.089339, 1.827035],
-            [50.089288, 1.827081], [50.089234, 1.827130], [50.089182, 1.827175],
-            [50.089130, 1.827226], [50.089082, 1.827271], [50.089029, 1.827322],
-            [50.088977, 1.827373], [50.088922, 1.827417], [50.088870, 1.827465],
-            [50.088817, 1.827507], [50.088766, 1.827559], [50.088713, 1.827610],
-            [50.088660, 1.827648], [50.088608, 1.827697], [50.088553, 1.827745],
-            [50.088501, 1.827788], [50.088448, 1.827829], [50.088394, 1.827874],
-            [50.088339, 1.827915], [50.088283, 1.827951], [50.088227, 1.827982],
-            [50.088170, 1.828020], [50.088114, 1.828052], [50.088060, 1.828089],
-            [50.088004, 1.828124], [50.087947, 1.828155], [50.087892, 1.828179],
-            [50.087835, 1.828212], [50.087780, 1.828248], [50.087724, 1.828279],
-            [50.087669, 1.828309], [50.087613, 1.828345], [50.087557, 1.828381],
-            [50.087503, 1.828410], [50.087446, 1.828440], [50.087391, 1.828472],
-            [50.087335, 1.828503], [50.087278, 1.828537], [50.087222, 1.828575],
-            [50.087166, 1.828608], [50.087110, 1.828643], [50.087054, 1.828675],
-            [50.086998, 1.828709], [50.086943, 1.828747], [50.086890, 1.828786],
-            [50.086836, 1.828827], [50.086782, 1.828867], [50.086728, 1.828907],
-            [50.086676, 1.828952], [50.086624, 1.829000], [50.086572, 1.829035],
-            [50.086518, 1.829086], [50.086466, 1.829137], [50.086415, 1.829178],
-            [50.086360, 1.829224], [50.086308, 1.829268], [50.086254, 1.829315],
-            [50.086202, 1.829362], [50.086148, 1.829408], [50.086093, 1.829459],
-            [50.086042, 1.829499], [50.085986, 1.829551], [50.085934, 1.829592],
-            [50.085882, 1.829638], [50.085825, 1.829684], [50.085769, 1.829722],
-            [50.085710, 1.829754], [50.085651, 1.829788], [50.085592, 1.829821],
-            [50.085535, 1.829854], [50.085477, 1.829887], [50.085423, 1.829917],
-            [50.085363, 1.829955], [50.085305, 1.830000], [50.085250, 1.830037],
-            [50.085196, 1.830083], [50.085141, 1.830125], [50.085085, 1.830165],
-            [50.085029, 1.830202], [50.084975, 1.830238], [50.084925, 1.830279],
-            [50.084871, 1.830318], [50.084818, 1.830359], [50.084767, 1.830400],
-            [50.084709, 1.830416], [50.084659, 1.830457], [50.084607, 1.830500],
-            [50.084556, 1.830542], [50.084506, 1.830583], [50.084458, 1.830623],
-            [50.084415, 1.830688], [50.084362, 1.830703], [50.084312, 1.830744],
-            [50.084265, 1.830784], [50.084216, 1.830826], [50.084167, 1.830867],
-            [50.084118, 1.830908], [50.084075, 1.830944], [50.084031, 1.830981],
-            [50.083982, 1.831041], [50.083938, 1.831083], [50.083887, 1.831130],
-            [50.083836, 1.831174], [50.083786, 1.831215], [50.083737, 1.831252],
-            [50.083682, 1.831295], [50.083630, 1.831341], [50.083578, 1.831384],
-            [50.083525, 1.831428], [50.083470, 1.831470], [50.083418, 1.831511],
-            [50.083363, 1.831549], [50.083309, 1.831588], [50.083246, 1.831596],
-            [50.083191, 1.831623], [50.083135, 1.831674], [50.083075, 1.831691],
-            [50.083018, 1.831713], [50.082956, 1.831701], [50.082894, 1.831710],
-            [50.082837, 1.831732], [50.082777, 1.831726], [50.082716, 1.831725],
-            [50.082654, 1.831726], [50.082593, 1.831733], [50.082532, 1.831743],
-            [50.082471, 1.831758], [50.082412, 1.831778], [50.082352, 1.831801],
-            [50.082293, 1.831827], [50.082237, 1.831858], [50.082180, 1.831891],
-            [50.082126, 1.831923], [50.082070, 1.831954], [50.082015, 1.831982],
-            [50.081961, 1.832013], [50.081906, 1.832044], [50.081853, 1.832072],
-            [50.081801, 1.832103], [50.081748, 1.832139], [50.081694, 1.832171],
-            [50.081640, 1.832204], [50.081589, 1.832239], [50.081538, 1.832283],
-            [50.081487, 1.832324], [50.081437, 1.832367], [50.081384, 1.832407],
-            [50.081330, 1.832445], [50.081279, 1.832486], [50.081227, 1.832523],
-            [50.081175, 1.832556], [50.081121, 1.832590], [50.081069, 1.832631],
-            [50.081017, 1.832667], [50.080965, 1.832703], [50.080913, 1.832743],
-            [50.080862, 1.832783], [50.080807, 1.832815], [50.080758, 1.832857],
-            [50.080707, 1.832894], [50.080657, 1.832929], [50.080605, 1.832969],
-            [50.080553, 1.833007], [50.080501, 1.833050], [50.080449, 1.833089],
-            [50.080393, 1.833123], [50.080338, 1.833159], [50.080284, 1.833201],
-            [50.080229, 1.833241], [50.080173, 1.833278], [50.080121, 1.833322],
-            [50.080066, 1.833361], [50.080012, 1.833406], [50.079957, 1.833448],
-            [50.079900, 1.833482], [50.079844, 1.833511], [50.079790, 1.833538],
-            [50.079735, 1.833600], [50.079622, 1.833639], [50.079569, 1.833684],
-            [50.079516, 1.833735], [50.079466, 1.833790], [50.079413, 1.833842],
-            [50.079363, 1.833890], [50.079309, 1.833939], [50.079253, 1.833983],
-            [50.079201, 1.834031], [50.079146, 1.834074], [50.079092, 1.834117],
-            [50.079039, 1.834156], [50.078987, 1.834164], [50.078925, 1.834227],
-            [50.078868, 1.834260], [50.078813, 1.834283], [50.078756, 1.834305],
-            [50.078695, 1.834327], [50.078636, 1.834347], [50.078577, 1.834364],
-            [50.078518, 1.834378], [50.078460, 1.834397], [50.078404, 1.834426],
-            [50.078347, 1.834456], [50.078291, 1.834492], [50.078238, 1.834528],
-            [50.078183, 1.834571], [50.078132, 1.834614], [50.078081, 1.834662],
-            [50.078034, 1.834721], [50.077992, 1.834786], [50.077951, 1.834852],
-            [50.077908, 1.834922], [50.077863, 1.834984], [50.077818, 1.835046],
-            [50.077773, 1.835112], [50.077729, 1.835173], [50.079885, 1.850210]
+            [50.109197, 1.828051],
+            [50.109147, 1.828052],
+            [50.109082, 1.828074],
+            [50.109006, 1.828129],
+            [50.108934, 1.828151],
+            [50.108867, 1.828153],
+            [50.108830, 1.828043],
+            [50.108853, 1.827980],
+            [50.108880, 1.827919],
+            [50.108901, 1.827854],
+            [50.108910, 1.827718],
+            [50.108893, 1.827637],
+            [50.108880, 1.827516],
+            [50.108858, 1.827384],
+            [50.108843, 1.827310],
+            [50.108824, 1.827241],
+            [50.108808, 1.827171],
+            [50.108764, 1.827041],
+            [50.108741, 1.826978],
+            [50.108723, 1.826906],
+            [50.108694, 1.826833],
+            [50.108675, 1.826759],
+            [50.108653, 1.826681],
+            [50.108624, 1.826623],
+            [50.108576, 1.826506],
+            [50.108554, 1.826374],
+            [50.108536, 1.826280],
+            [50.108567, 1.826200],
+            [50.108640, 1.826177],
+            [50.108730, 1.826121],
+            [50.108781, 1.826098],
+            [50.108831, 1.826081],
+            [50.108872, 1.826046],
+            [50.108918, 1.826022],
+            [50.108971, 1.826003],
+            [50.109035, 1.825973],
+            [50.109051, 1.825881],
+            [50.109030, 1.825769],
+            [50.109007, 1.825632],
+            [50.108997, 1.825562],
+            [50.108990, 1.825433],
+            [50.109017, 1.825377],
+            [50.109063, 1.825340],
+            [50.109117, 1.825319],
+            [50.109178, 1.825283],
+            [50.109230, 1.825249],
+            [50.109287, 1.825210],
+            [50.109340, 1.825174],
+            [50.109396, 1.825137],
+            [50.109454, 1.825100],
+            [50.109510, 1.825066],
+            [50.109563, 1.825026],
+            [50.109618, 1.824990],
+            [50.109666, 1.824954],
+            [50.109714, 1.824930],
+            [50.109761, 1.824903],
+            [50.109821, 1.824854],
+            [50.109872, 1.824815],
+            [50.109923, 1.824782],
+            [50.109972, 1.824759],
+            [50.110022, 1.824726],
+            [50.110071, 1.824690],
+            [50.110130, 1.824657],
+            [50.110186, 1.824621],
+            [50.110241, 1.824583],
+            [50.110296, 1.824550],
+            [50.110349, 1.824525],
+            [50.110407, 1.824495],
+            [50.110470, 1.824460],
+            [50.110533, 1.824427],
+            [50.110591, 1.824393],
+            [50.110650, 1.824366],
+            [50.110712, 1.824340],
+            [50.110775, 1.824302],
+            [50.110831, 1.824271],
+            [50.110892, 1.824236],
+            [50.110953, 1.824216],
+            [50.111013, 1.824192],
+            [50.111079, 1.824156],
+            [50.111141, 1.824127],
+            [50.111207, 1.824102],
+            [50.111271, 1.824068],
+            [50.111334, 1.824043],
+            [50.111394, 1.824016],
+            [50.111456, 1.823985],
+            [50.111516, 1.823958],
+            [50.111575, 1.823943],
+            [50.111675, 1.823880],
+            [50.111751, 1.823860],
+            [50.111814, 1.823843],
+            [50.111880, 1.823819],
+            [50.111943, 1.823791],
+            [50.112003, 1.823758],
+            [50.112066, 1.823723],
+            [50.112129, 1.823694],
+            [50.112190, 1.823676],
+            [50.112247, 1.823640],
+            [50.112303, 1.823592],
+            [50.112353, 1.823530],
+            [50.112395, 1.823460],
+            [50.112434, 1.823377],
+            [50.112476, 1.823302],
+            [50.112513, 1.823226],
+            [50.112536, 1.823127],
+            [50.112550, 1.823023],
+            [50.112566, 1.822922],
+            [50.112580, 1.822818],
+            [50.112590, 1.822715],
+            [50.112597, 1.822614],
+            [50.112602, 1.822510],
+            [50.112599, 1.822409],
+            [50.112591, 1.822309],
+            [50.112581, 1.822207],
+            [50.112567, 1.822106],
+            [50.112546, 1.822007],
+            [50.112519, 1.821912],
+            [50.112491, 1.821822],
+            [50.112461, 1.821729],
+            [50.112432, 1.821640],
+            [50.112400, 1.821545],
+            [50.112366, 1.821452],
+            [50.112335, 1.821358],
+            [50.112301, 1.821262],
+            [50.112266, 1.821172],
+            [50.112236, 1.821083],
+            [50.112202, 1.820990],
+            [50.112172, 1.820894],
+            [50.112140, 1.820798],
+            [50.112110, 1.820711],
+            [50.112079, 1.820615],
+            [50.112048, 1.820520],
+            [50.112018, 1.820432],
+            [50.111987, 1.820337],
+            [50.111959, 1.820241],
+            [50.111934, 1.820148],
+            [50.111912, 1.820050],
+            [50.111886, 1.819956],
+            [50.111862, 1.819860],
+            [50.111844, 1.819760],
+            [50.111823, 1.819664],
+            [50.111803, 1.819564],
+            [50.111782, 1.819467],
+            [50.111759, 1.819379],
+            [50.111734, 1.819283],
+            [50.111711, 1.819199],
+            [50.111688, 1.819115],
+            [50.111666, 1.819027],
+            [50.111645, 1.818937],
+            [50.111624, 1.818862],
+            [50.111594, 1.818780],
+            [50.111573, 1.818705],
+            [50.111561, 1.818630],
+            [50.111544, 1.818556],
+            [50.111509, 1.818461],
+            [50.111432, 1.818525],
+            [50.111348, 1.818609],
+            [50.111299, 1.818632],
+            [50.111242, 1.818661],
+            [50.111191, 1.818690],
+            [50.111130, 1.818742],
+            [50.111075, 1.818778],
+            [50.111025, 1.818817],
+            [50.110966, 1.818869],
+            [50.110912, 1.818916],
+            [50.110852, 1.818964],
+            [50.110790, 1.819005],
+            [50.110728, 1.819049],
+            [50.110670, 1.819117],
+            [50.110620, 1.819155],
+            [50.110549, 1.819159],
+            [50.110470, 1.819158],
+            [50.110415, 1.819191],
+            [50.110357, 1.819229],
+            [50.110297, 1.819267],
+            [50.110244, 1.819294],
+            [50.110188, 1.819330],
+            [50.110133, 1.819365],
+            [50.110082, 1.819397],
+            [50.110021, 1.819433],
+            [50.109966, 1.819469],
+            [50.109909, 1.819510],
+            [50.109847, 1.819541],
+            [50.109787, 1.819577],
+            [50.109727, 1.819609],
+            [50.109664, 1.819647],
+            [50.109605, 1.819685],
+            [50.109540, 1.819727],
+            [50.109476, 1.819765],
+            [50.109413, 1.819801],
+            [50.109352, 1.819836],
+            [50.109297, 1.819873],
+            [50.109237, 1.819913],
+            [50.109179, 1.819951],
+            [50.109119, 1.819987],
+            [50.109064, 1.820024],
+            [50.109005, 1.820066],
+            [50.108949, 1.820104],
+            [50.108892, 1.820145],
+            [50.108837, 1.820182],
+            [50.108779, 1.820221],
+            [50.108724, 1.820263],
+            [50.108663, 1.820305],
+            [50.108604, 1.820345],
+            [50.108543, 1.820388],
+            [50.108487, 1.820435],
+            [50.108432, 1.820488],
+            [50.108368, 1.820537],
+            [50.108312, 1.820586],
+            [50.108253, 1.820631],
+            [50.108199, 1.820678],
+            [50.108137, 1.820729],
+            [50.108083, 1.820776],
+            [50.108026, 1.820820],
+            [50.107971, 1.820869],
+            [50.107913, 1.820919],
+            [50.107856, 1.820967],
+            [50.107808, 1.821013],
+            [50.107752, 1.821058],
+            [50.107696, 1.821107],
+            [50.107643, 1.821158],
+            [50.107595, 1.821201],
+            [50.107536, 1.821250],
+            [50.107478, 1.821292],
+            [50.107424, 1.821340],
+            [50.107364, 1.821384],
+            [50.107315, 1.821428],
+            [50.107258, 1.821472],
+            [50.107201, 1.821521],
+            [50.107151, 1.821563],
+            [50.107095, 1.821610],
+            [50.107040, 1.821656],
+            [50.106990, 1.821704],
+            [50.106937, 1.821748],
+            [50.106880, 1.821795],
+            [50.106831, 1.821841],
+            [50.106779, 1.821883],
+            [50.106724, 1.821930],
+            [50.106670, 1.821980],
+            [50.106617, 1.822031],
+            [50.106565, 1.822078],
+            [50.106508, 1.822119],
+            [50.106452, 1.822166],
+            [50.106399, 1.822214],
+            [50.106343, 1.822263],
+            [50.106293, 1.822310],
+            [50.106236, 1.822359],
+            [50.106184, 1.822400],
+            [50.106130, 1.822445],
+            [50.106073, 1.822489],
+            [50.106025, 1.822535],
+            [50.105969, 1.822581],
+            [50.105918, 1.822626],
+            [50.105869, 1.822677],
+            [50.105810, 1.822721],
+            [50.105759, 1.822771],
+            [50.105703, 1.822820],
+            [50.105649, 1.822865],
+            [50.105593, 1.822909],
+            [50.105537, 1.822952],
+            [50.105486, 1.823001],
+            [50.105436, 1.823050],
+            [50.105387, 1.823101],
+            [50.105280, 1.823037],
+            [50.105227, 1.823089],
+            [50.105173, 1.823144],
+            [50.105120, 1.823200],
+            [50.105070, 1.823257],
+            [50.105017, 1.823320],
+            [50.104965, 1.823384],
+            [50.104919, 1.823440],
+            [50.104870, 1.823500],
+            [50.104821, 1.823561],
+            [50.104772, 1.823621],
+            [50.104725, 1.823679],
+            [50.104681, 1.823734],
+            [50.104634, 1.823792],
+            [50.104584, 1.823854],
+            [50.104537, 1.823912],
+            [50.104485, 1.823976],
+            [50.104438, 1.824034],
+            [50.104388, 1.824095],
+            [50.104342, 1.824152],
+            [50.104350, 1.824325],
+            [50.104307, 1.824389],
+            [50.104257, 1.824450],
+            [50.104209, 1.824506],
+            [50.104165, 1.824563],
+            [50.104116, 1.824624],
+            [50.104069, 1.824683],
+            [50.104023, 1.824738],
+            [50.103979, 1.824795],
+            [50.103934, 1.824852],
+            [50.103891, 1.824911],
+            [50.103846, 1.824965],
+            [50.103800, 1.825016],
+            [50.103758, 1.825064],
+            [50.103706, 1.825120],
+            [50.103666, 1.825169],
+            [50.103619, 1.825225],
+            [50.103575, 1.825283],
+            [50.103531, 1.825337],
+            [50.103482, 1.825394],
+            [50.103399, 1.825477],
+            [50.103361, 1.825521],
+            [50.103303, 1.825606],
+            [50.103250, 1.825674],
+            [50.103189, 1.825706],
+            [50.103145, 1.825744],
+            [50.103120, 1.825835],
+            [50.103078, 1.825915],
+            [50.102968, 1.825873],
+            [50.102910, 1.825942],
+            [50.102853, 1.826011],
+            [50.102797, 1.826081],
+            [50.102743, 1.826149],
+            [50.102687, 1.826219],
+            [50.102631, 1.826289],
+            [50.102576, 1.826358],
+            [50.102578, 1.826536],
+            [50.102522, 1.826599],
+            [50.102463, 1.826668],
+            [50.102413, 1.826737],
+            [50.102360, 1.826806],
+            [50.102308, 1.826870],
+            [50.102254, 1.826934],
+            [50.102207, 1.826997],
+            [50.102155, 1.827064],
+            [50.102099, 1.827125],
+            [50.102042, 1.827192],
+            [50.101992, 1.827256],
+            [50.101939, 1.827322],
+            [50.101882, 1.827388],
+            [50.101827, 1.827459],
+            [50.101774, 1.827531],
+            [50.101721, 1.827606],
+            [50.101670, 1.827683],
+            [50.101621, 1.827762],
+            [50.101577, 1.827846],
+            [50.101536, 1.827927],
+            [50.101497, 1.828013],
+            [50.101457, 1.828096],
+            [50.101416, 1.828185],
+            [50.101377, 1.828273],
+            [50.101336, 1.828360],
+            [50.101296, 1.828444],
+            [50.101256, 1.828529],
+            [50.101220, 1.828614],
+            [50.101186, 1.828704],
+            [50.101160, 1.828800],
+            [50.101148, 1.828895],
+            [50.101166, 1.829002],
+            [50.101201, 1.829102],
+            [50.101210, 1.829220],
+            [50.101195, 1.829337],
+            [50.101163, 1.829449],
+            [50.101112, 1.829539],
+            [50.101067, 1.829611],
+            [50.101022, 1.829681],
+            [50.100975, 1.829746],
+            [50.100926, 1.829812],
+            [50.100878, 1.829870],
+            [50.100821, 1.829927],
+            [50.100760, 1.829966],
+            [50.100693, 1.829974],
+            [50.100636, 1.829988],
+            [50.100579, 1.830014],
+            [50.100521, 1.830041],
+            [50.100468, 1.830068],
+            [50.100409, 1.830111],
+            [50.100353, 1.830155],
+            [50.100297, 1.830197],
+            [50.100239, 1.830239],
+            [50.100180, 1.830278],
+            [50.100119, 1.830301],
+            [50.100059, 1.830321],
+            [50.099999, 1.830353],
+            [50.099944, 1.830409],
+            [50.099899, 1.830481],
+            [50.099849, 1.830549],
+            [50.099790, 1.830588],
+            [50.099721, 1.830605],
+            [50.099657, 1.830621],
+            [50.099596, 1.830648],
+            [50.099534, 1.830675],
+            [50.099473, 1.830697],
+            [50.099415, 1.830718],
+            [50.099357, 1.830756],
+            [50.099292, 1.830783],
+            [50.099233, 1.830803],
+            [50.099175, 1.830825],
+            [50.099117, 1.830857],
+            [50.099060, 1.830883],
+            [50.099004, 1.830914],
+            [50.098944, 1.830945],
+            [50.098889, 1.830973],
+            [50.098832, 1.831010],
+            [50.098777, 1.831042],
+            [50.098717, 1.831078],
+            [50.098661, 1.831114],
+            [50.098600, 1.831157],
+            [50.098543, 1.831188],
+            [50.098492, 1.831217],
+            [50.098432, 1.831257],
+            [50.098373, 1.831303],
+            [50.098314, 1.831343],
+            [50.098259, 1.831380],
+            [50.098199, 1.831416],
+            [50.098143, 1.831450],
+            [50.098085, 1.831489],
+            [50.098029, 1.831532],
+            [50.097973, 1.831574],
+            [50.097916, 1.831615],
+            [50.097854, 1.831651],
+            [50.097796, 1.831686],
+            [50.097735, 1.831728],
+            [50.097674, 1.831764],
+            [50.097613, 1.831796],
+            [50.097549, 1.831822],
+            [50.097490, 1.831844],
+            [50.097421, 1.831858],
+            [50.097353, 1.831866],
+            [50.097290, 1.831868],
+            [50.097221, 1.831863],
+            [50.097155, 1.831854],
+            [50.097092, 1.831844],
+            [50.097028, 1.831836],
+            [50.096963, 1.831833],
+            [50.096899, 1.831820],
+            [50.096837, 1.831798],
+            [50.096774, 1.831777],
+            [50.096714, 1.831749],
+            [50.096660, 1.831726],
+            [50.096597, 1.831684],
+            [50.096540, 1.831647],
+            [50.096478, 1.831608],
+            [50.096423, 1.831563],
+            [50.096364, 1.831513],
+            [50.096305, 1.831470],
+            [50.096247, 1.831425],
+            [50.096189, 1.831377],
+            [50.096134, 1.831326],
+            [50.096088, 1.831261],
+            [50.096037, 1.831201],
+            [50.095992, 1.831148],
+            [50.095931, 1.831080],
+            [50.095883, 1.831019],
+            [50.095831, 1.830960],
+            [50.095778, 1.830897],
+            [50.095725, 1.830839],
+            [50.095671, 1.830773],
+            [50.095619, 1.830723],
+            [50.095569, 1.830668],
+            [50.095525, 1.830609],
+            [50.095473, 1.830548],
+            [50.095425, 1.830493],
+            [50.095376, 1.830439],
+            [50.095323, 1.830378],
+            [50.095272, 1.830325],
+            [50.095219, 1.830268],
+            [50.095170, 1.830211],
+            [50.095120, 1.830155],
+            [50.095068, 1.830104],
+            [50.095013, 1.830054],
+            [50.094960, 1.830004],
+            [50.094907, 1.829950],
+            [50.094861, 1.829892],
+            [50.094813, 1.829830],
+            [50.094768, 1.829776],
+            [50.094710, 1.829739],
+            [50.094654, 1.829711],
+            [50.094597, 1.829671],
+            [50.094543, 1.829627],
+            [50.094486, 1.829585],
+            [50.094432, 1.829542],
+            [50.094376, 1.829500],
+            [50.094320, 1.829458],
+            [50.094263, 1.829413],
+            [50.094205, 1.829366],
+            [50.094147, 1.829319],
+            [50.094089, 1.829270],
+            [50.094031, 1.829218],
+            [50.093973, 1.829166],
+            [50.093918, 1.829119],
+            [50.093859, 1.829073],
+            [50.093802, 1.829023],
+            [50.093748, 1.828972],
+            [50.093691, 1.828922],
+            [50.093637, 1.828870],
+            [50.093584, 1.828813],
+            [50.093529, 1.828754],
+            [50.093475, 1.828700],
+            [50.093417, 1.828649],
+            [50.093361, 1.828604],
+            [50.093300, 1.828554],
+            [50.093239, 1.828507],
+            [50.093179, 1.828453],
+            [50.093124, 1.828398],
+            [50.093066, 1.828348],
+            [50.093009, 1.828305],
+            [50.092948, 1.828254],
+            [50.092888, 1.828206],
+            [50.092827, 1.828158],
+            [50.092764, 1.828113],
+            [50.092701, 1.828073],
+            [50.092639, 1.828032],
+            [50.092580, 1.827983],
+            [50.092520, 1.827934],
+            [50.092464, 1.827877],
+            [50.092406, 1.827816],
+            [50.092349, 1.827761],
+            [50.092292, 1.827711],
+            [50.092231, 1.827661],
+            [50.092172, 1.827617],
+            [50.092113, 1.827577],
+            [50.092056, 1.827532],
+            [50.092006, 1.827481],
+            [50.091972, 1.827416],
+            [50.091936, 1.827321],
+            [50.091899, 1.827243],
+            [50.091849, 1.827160],
+            [50.091800, 1.827086],
+            [50.091751, 1.827012],
+            [50.091699, 1.826944],
+            [50.091647, 1.826880],
+            [50.091591, 1.826819],
+            [50.091539, 1.826760],
+            [50.091485, 1.826705],
+            [50.091425, 1.826658],
+            [50.091369, 1.826610],
+            [50.091314, 1.826556],
+            [50.091261, 1.826498],
+            [50.091205, 1.826443],
+            [50.091148, 1.826394],
+            [50.091089, 1.826351],
+            [50.091030, 1.826314],
+            [50.090965, 1.826290],
+            [50.090899, 1.826268],
+            [50.090835, 1.826252],
+            [50.090770, 1.826244],
+            [50.090703, 1.826242],
+            [50.090640, 1.826245],
+            [50.090577, 1.826250],
+            [50.090513, 1.826257],
+            [50.090450, 1.826268],
+            [50.090388, 1.826287],
+            [50.090325, 1.826317],
+            [50.090263, 1.826348],
+            [50.090205, 1.826379],
+            [50.090148, 1.826415],
+            [50.090090, 1.826452],
+            [50.090036, 1.826487],
+            [50.089982, 1.826521],
+            [50.089926, 1.826557],
+            [50.089871, 1.826599],
+            [50.089818, 1.826635],
+            [50.089762, 1.826676],
+            [50.089708, 1.826720],
+            [50.089652, 1.826766],
+            [50.089600, 1.826805],
+            [50.089546, 1.826845],
+            [50.089493, 1.826889],
+            [50.089442, 1.826938],
+            [50.089391, 1.826986],
+            [50.089339, 1.827035],
+            [50.089288, 1.827081],
+            [50.089234, 1.827130],
+            [50.089182, 1.827175],
+            [50.089130, 1.827226],
+            [50.089082, 1.827271],
+            [50.089029, 1.827322],
+            [50.088977, 1.827373],
+            [50.088922, 1.827417],
+            [50.088870, 1.827465],
+            [50.088817, 1.827507],
+            [50.088766, 1.827559],
+            [50.088713, 1.827610],
+            [50.088660, 1.827648],
+            [50.088608, 1.827697],
+            [50.088553, 1.827745],
+            [50.088501, 1.827788],
+            [50.088448, 1.827829],
+            [50.088394, 1.827874],
+            [50.088339, 1.827915],
+            [50.088283, 1.827951],
+            [50.088227, 1.827982],
+            [50.088170, 1.828020],
+            [50.088114, 1.828052],
+            [50.088060, 1.828089],
+            [50.088004, 1.828124],
+            [50.087947, 1.828155],
+            [50.087892, 1.828179],
+            [50.087835, 1.828212],
+            [50.087780, 1.828248],
+            [50.087724, 1.828279],
+            [50.087669, 1.828309],
+            [50.087613, 1.828345],
+            [50.087557, 1.828381],
+            [50.087503, 1.828410],
+            [50.087446, 1.828440],
+            [50.087391, 1.828472],
+            [50.087335, 1.828503],
+            [50.087278, 1.828537],
+            [50.087222, 1.828575],
+            [50.087166, 1.828608],
+            [50.087110, 1.828643],
+            [50.087054, 1.828675],
+            [50.086998, 1.828709],
+            [50.086943, 1.828747],
+            [50.086890, 1.828786],
+            [50.086836, 1.828827],
+            [50.086782, 1.828867],
+            [50.086728, 1.828907],
+            [50.086676, 1.828952],
+            [50.086624, 1.829000],
+            [50.086572, 1.829035],
+            [50.086518, 1.829086],
+            [50.086466, 1.829137],
+            [50.086415, 1.829178],
+            [50.086360, 1.829224],
+            [50.086308, 1.829268],
+            [50.086254, 1.829315],
+            [50.086202, 1.829362],
+            [50.086148, 1.829408],
+            [50.086093, 1.829459],
+            [50.086042, 1.829499],
+            [50.085986, 1.829551],
+            [50.085934, 1.829592],
+            [50.085882, 1.829638],
+            [50.085825, 1.829684],
+            [50.085769, 1.829722],
+            [50.085710, 1.829754],
+            [50.085651, 1.829788],
+            [50.085592, 1.829821],
+            [50.085535, 1.829854],
+            [50.085477, 1.829887],
+            [50.085423, 1.829917],
+            [50.085363, 1.829955],
+            [50.085305, 1.830000],
+            [50.085250, 1.830037],
+            [50.085196, 1.830083],
+            [50.085141, 1.830125],
+            [50.085085, 1.830165],
+            [50.085029, 1.830202],
+            [50.084975, 1.830238],
+            [50.084925, 1.830279],
+            [50.084871, 1.830318],
+            [50.084818, 1.830359],
+            [50.084767, 1.830400],
+            [50.084709, 1.830416],
+            [50.084659, 1.830457],
+            [50.084607, 1.830500],
+            [50.084556, 1.830542],
+            [50.084506, 1.830583],
+            [50.084458, 1.830623],
+            [50.084415, 1.830688],
+            [50.084362, 1.830703],
+            [50.084312, 1.830744],
+            [50.084265, 1.830784],
+            [50.084216, 1.830826],
+            [50.084167, 1.830867],
+            [50.084118, 1.830908],
+            [50.084075, 1.830944],
+            [50.084031, 1.830981],
+            [50.083982, 1.831041],
+            [50.083938, 1.831083],
+            [50.083887, 1.831130],
+            [50.083836, 1.831174],
+            [50.083786, 1.831215],
+            [50.083737, 1.831252],
+            [50.083682, 1.831295],
+            [50.083630, 1.831341],
+            [50.083578, 1.831384],
+            [50.083525, 1.831428],
+            [50.083470, 1.831470],
+            [50.083418, 1.831511],
+            [50.083363, 1.831549],
+            [50.083309, 1.831588],
+            [50.083246, 1.831596],
+            [50.083191, 1.831623],
+            [50.083135, 1.831674],
+            [50.083075, 1.831691],
+            [50.083018, 1.831713],
+            [50.082956, 1.831701],
+            [50.082894, 1.831710],
+            [50.082837, 1.831732],
+            [50.082777, 1.831726],
+            [50.082716, 1.831725],
+            [50.082654, 1.831726],
+            [50.082593, 1.831733],
+            [50.082532, 1.831743],
+            [50.082471, 1.831758],
+            [50.082412, 1.831778],
+            [50.082352, 1.831801],
+            [50.082293, 1.831827],
+            [50.082237, 1.831858],
+            [50.082180, 1.831891],
+            [50.082126, 1.831923],
+            [50.082070, 1.831954],
+            [50.082015, 1.831982],
+            [50.081961, 1.832013],
+            [50.081906, 1.832044],
+            [50.081853, 1.832072],
+            [50.081801, 1.832103],
+            [50.081748, 1.832139],
+            [50.081694, 1.832171],
+            [50.081640, 1.832204],
+            [50.081589, 1.832239],
+            [50.081538, 1.832283],
+            [50.081487, 1.832324],
+            [50.081437, 1.832367],
+            [50.081384, 1.832407],
+            [50.081330, 1.832445],
+            [50.081279, 1.832486],
+            [50.081227, 1.832523],
+            [50.081175, 1.832556],
+            [50.081121, 1.832590],
+            [50.081069, 1.832631],
+            [50.081017, 1.832667],
+            [50.080965, 1.832703],
+            [50.080913, 1.832743],
+            [50.080862, 1.832783],
+            [50.080807, 1.832815],
+            [50.080758, 1.832857],
+            [50.080707, 1.832894],
+            [50.080657, 1.832929],
+            [50.080605, 1.832969],
+            [50.080553, 1.833007],
+            [50.080501, 1.833050],
+            [50.080449, 1.833089],
+            [50.080393, 1.833123],
+            [50.080338, 1.833159],
+            [50.080284, 1.833201],
+            [50.080229, 1.833241],
+            [50.080173, 1.833278],
+            [50.080121, 1.833322],
+            [50.080066, 1.833361],
+            [50.080012, 1.833406],
+            [50.079957, 1.833448],
+            [50.079900, 1.833482],
+            [50.079844, 1.833511],
+            [50.079790, 1.833538],
+            [50.079735, 1.833600],
+            [50.079622, 1.833639],
+            [50.079569, 1.833684],
+            [50.079516, 1.833735],
+            [50.079466, 1.833790],
+            [50.079413, 1.833842],
+            [50.079363, 1.833890],
+            [50.079309, 1.833939],
+            [50.079253, 1.833983],
+            [50.079201, 1.834031],
+            [50.079146, 1.834074],
+            [50.079092, 1.834117],
+            [50.079039, 1.834156],
+            [50.078987, 1.834164],
+            [50.078925, 1.834227],
+            [50.078868, 1.834260],
+            [50.078813, 1.834283],
+            [50.078756, 1.834305],
+            [50.078695, 1.834327],
+            [50.078636, 1.834347],
+            [50.078577, 1.834364],
+            [50.078518, 1.834378],
+            [50.078460, 1.834397],
+            [50.078404, 1.834426],
+            [50.078347, 1.834456],
+            [50.078291, 1.834492],
+            [50.078238, 1.834528],
+            [50.078183, 1.834571],
+            [50.078132, 1.834614],
+            [50.078081, 1.834662],
+            [50.078034, 1.834721],
+            [50.077992, 1.834786],
+            [50.077951, 1.834852],
+            [50.077908, 1.834922],
+            [50.077863, 1.834984],
+            [50.077818, 1.835046],
+            [50.077773, 1.835112],
+            [50.077729, 1.835173],
+            [50.079885, 1.850210]
         ];
 
         // ============================================================
-        // WALKIE-TALKIE (PEERJS) - GLOBAL VARIABELEN
+        // WALKIE-TALKIE (PEERJS)
         // ============================================================
         let peer = null;
         let localStream = null;
@@ -839,50 +2079,150 @@
 
             vulStadSelector();
             tekenKMLTrack();
-            tekenPOIs(); // Voeg bezienswaardigheden toe
+            tekenPOIs();
             luisterNaarFirebase();
+            laadPoisUitFirebase();
         }
 
         // ----- POI (Bezienswaardigheden) -----
         let poiMarkers = [];
+        let poiFirebaseRef = null;
 
         function tekenPOIs() {
-            // Verwijder oude POI-markers
             poiMarkers.forEach(m => map.removeLayer(m));
             poiMarkers = [];
 
-            // Filter op huidige stad
             const stadPOIs = poiData.filter(p => p.stad === huidigeStad);
 
+            const themaKleuren = {
+                romeins: '#ff6b6b',
+                honderd: '#ffd93d',
+                woi: '#6bcbff',
+                revolutie: '#b388ff'
+            };
+
             stadPOIs.forEach(p => {
-                // Controleer of thema is ingeschakeld
                 if (!stippelStatus[p.thema]) return;
 
-                let kleur;
-                switch(p.thema) {
-                    case 'romeins': kleur = '#1d6b4c'; break;
-                    case 'honderd': kleur = '#b34b2e'; break;
-                    case 'woi': kleur = '#5f6b7a'; break;
-                    case 'revolutie': kleur = '#8e44ad'; break;
-                    default: kleur = '#888';
-                }
-
+                const kleur = themaKleuren[p.thema] || '#888';
                 const marker = L.circleMarker([p.lat, p.lng], {
                     color: kleur,
                     fillColor: kleur,
-                    fillOpacity: 0.7,
-                    radius: 7
+                    fillOpacity: 0.85,
+                    radius: 10,
+                    weight: 3,
+                    stroke: true,
+                    opacity: 1
                 }).addTo(map);
 
                 marker.bindPopup(`
                     <div class="popup-container">
-                        <div class="popup-title">${p.naam}</div>
-                        <div class="popup-sub ${p.thema}">${p.thema}</div>
-                        <div class="popup-text">${p.beschrijving}</div>
+                        <div class="popup-title" style="font-weight:bold;">${p.naam}</div>
+                        <div class="popup-sub ${p.thema}" style="color:${kleur};">${p.thema}</div>
+                        <div class="popup-text">${p.beschrijving || ''}</div>
                     </div>
                 `);
                 poiMarkers.push(marker);
             });
+        }
+
+        // ----- Firebase POI sync -----
+        function laadPoisUitFirebase() {
+            poiFirebaseRef = database.ref('pois');
+            poiFirebaseRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+                // Voeg POI's toe aan poiData (alleen als ze niet bestaan)
+                Object.values(data).forEach(p => {
+                    // Controleer of al in poiData (op naam en stad)
+                    const exists = poiData.some(ex => ex.naam === p.naam && ex.stad === p.stad);
+                    if (!exists && p.stad && p.lat && p.lng) {
+                        poiData.push({
+                            stad: p.stad,
+                            thema: p.thema || 'romeins',
+                            lat: p.lat,
+                            lng: p.lng,
+                            naam: p.naam,
+                            beschrijving: p.beschrijving || ''
+                        });
+                    }
+                });
+                tekenPOIs();
+            });
+        }
+
+        function voegPoiToe() {
+            const naam = document.getElementById('poiNaam').value.trim();
+            const beschrijving = document.getElementById('poiBeschrijving').value.trim();
+            const thema = document.getElementById('poiThema').value;
+            const lat = parseFloat(document.getElementById('poiLat').value);
+            const lng = parseFloat(document.getElementById('poiLng').value);
+
+            if (!naam || isNaN(lat) || isNaN(lng)) {
+                alert("Vul een naam en geldige coördinaten in.");
+                return;
+            }
+
+            const nieuwePoi = {
+                stad: huidigeStad,
+                thema: thema,
+                lat: lat,
+                lng: lng,
+                naam: naam,
+                beschrijving: beschrijving,
+                maker: huidigeGebruiker,
+                timestamp: Date.now()
+            };
+
+            // Opslaan in Firebase
+            const ref = database.ref('pois').push();
+            ref.set(nieuwePoi).then(() => {
+                sluitPoiPopup();
+                document.getElementById('poiNaam').value = '';
+                document.getElementById('poiBeschrijving').value = '';
+                document.getElementById('poiLat').value = '';
+                document.getElementById('poiLng').value = '';
+                // Voeg lokaal toe
+                poiData.push(nieuwePoi);
+                tekenPOIs();
+            }).catch(err => alert("Fout bij opslaan: " + err.message));
+        }
+
+        function openPoiPopup() {
+            document.getElementById('poiPopup').style.display = 'flex';
+        }
+
+        function sluitPoiPopup() {
+            document.getElementById('poiPopup').style.display = 'none';
+            if (map) map.off('click', handleMapClickPoi);
+        }
+
+        function kiesOpKaart(type) {
+            if (type === 'cache') {
+                sluitCachePopup();
+                map.once('click', handleMapClickCache);
+                alert("Klik op de kaart om de locatie te kiezen.");
+            } else if (type === 'poi') {
+                sluitPoiPopup();
+                map.once('click', handleMapClickPoi);
+                alert("Klik op de kaart om de locatie te kiezen.");
+            }
+        }
+
+        function handleMapClickCache(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            openCachePopup();
+            document.getElementById('popupLatInput').value = lat.toFixed(6);
+            document.getElementById('popupLngInput').value = lng.toFixed(6);
+        }
+
+        function handleMapClickPoi(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            openPoiPopup();
+            document.getElementById('poiLat').value = lat.toFixed(6);
+            document.getElementById('poiLng').value = lng.toFixed(6);
         }
 
         // ----- KML & THEMA -----
@@ -904,7 +2244,7 @@
 
         function setStippel(thema, checked) {
             stippelStatus[thema] = checked;
-            tekenPOIs(); // ververs de POI-markers
+            tekenPOIs();
         }
 
         // ----- Overige functies (stad, cache, upload, etc.) -----
@@ -930,23 +2270,24 @@
 
             document.getElementById('userBadge').innerText = "👤 " + huidigeGebruiker + (isLeider ? " 👑" : "");
             document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('coordPanel').style.display = 'block';
+            document.getElementById('popupMenu').style.display = 'block';
             document.getElementById('legende').style.display = 'flex';
             document.getElementById('locateBtn').style.display = 'flex';
             document.getElementById('wtToggleBtn').style.display = 'flex';
 
             if (!map) initMap();
             startLocatieTracking();
-            initWalkieTalkie(); // Start PeerJS
+            initWalkieTalkie();
         }
 
         function logout() {
             document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('coordPanel').style.display = 'none';
+            document.getElementById('popupMenu').style.display = 'none';
             document.getElementById('legende').style.display = 'none';
             document.getElementById('locateBtn').style.display = 'none';
             document.getElementById('wtToggleBtn').style.display = 'none';
-            if (peer) { peer.destroy(); peer = null; }
+            if (peer) { peer.destroy();
+                peer = null; }
             connections = [];
             remoteStreams.clear();
             isConnected = false;
@@ -956,7 +2297,7 @@
             if (steden[stadKey]) {
                 huidigeStad = stadKey;
                 map.setView([steden[stadKey].lat, steden[stadKey].lng], steden[stadKey].zoom);
-                tekenPOIs(); // toon POI's van de nieuwe stad
+                tekenPOIs();
             }
         }
 
@@ -992,7 +2333,7 @@
 
         function sluitCachePopup() {
             document.getElementById('cachePopup').style.display = 'none';
-            if (map) map.off('click', handleMapClick);
+            if (map) map.off('click', handleMapClickCache);
         }
 
         function voegPopupCacheToe() {
@@ -1019,20 +2360,6 @@
             } else {
                 alert("Voer geldige coördinaten in (decimaal).");
             }
-        }
-
-        function kiesOpKaart() {
-            sluitCachePopup();
-            map.once('click', handleMapClick);
-            alert("Klik op de kaart om de locatie te kiezen.");
-        }
-
-        function handleMapClick(e) {
-            const lat = e.latlng.lat;
-            const lng = e.latlng.lng;
-            openCachePopup();
-            document.getElementById('popupLatInput').value = lat.toFixed(6);
-            document.getElementById('popupLngInput').value = lng.toFixed(6);
         }
 
         function meenemenCacheVerwijderen(key) {
@@ -1135,7 +2462,8 @@
                     huidigeLatLng = [pos.coords.latitude, pos.coords.longitude];
                     if (!userMarker) {
                         userMarker = L.marker(huidigeLatLng).addTo(map).bindPopup("Jij bent hier!");
-                        userCircle = L.circle(huidigeLatLng, { radius: GEOFENCE_STRAAL, color: '#3388ff', fillOpacity: 0.15 }).addTo(map);
+                        userCircle = L.circle(huidigeLatLng, { radius: GEOFENCE_STRAAL, color: '#3388ff',
+                            fillOpacity: 0.15 }).addTo(map);
                     } else {
                         userMarker.setLatLng(huidigeLatLng);
                         userCircle.setLatLng(huidigeLatLng);
@@ -1183,11 +2511,13 @@
         }
 
         function wtAddChat(sender, text, isSystem = false) {
-            const time = new Date().toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
+            const time = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
             const div = document.createElement('div');
             div.className = 'msg';
-            if (isSystem) { div.style.color = '#8899aa'; div.style.fontStyle = 'italic'; }
-            div.innerHTML = `<span class="sender">${sender}</span> ${text} <span class="time">${time}</span>`;
+            if (isSystem) { div.style.color = '#8899aa';
+                div.style.fontStyle = 'italic'; }
+            div.innerHTML =
+                `<span class="sender">${sender}</span> ${text} <span class="time">${time}</span>`;
             wtChatMessages.appendChild(div);
             wtChatMessages.scrollTop = wtChatMessages.scrollHeight;
         }
@@ -1201,7 +2531,7 @@
                 return;
             }
             let html = '';
-            const roleEmoji = { leider:'👑', deelnemer:'👤' };
+            const roleEmoji = { leider: '👑', deelnemer: '👤' };
             html += `<div class="wt-user-chip self">
                 <span>${isLeider ? '👑' : '👤'}</span> ${huidigeGebruiker} (jij)
                 ${isSpeaking ? '🔊' : ''}
@@ -1215,15 +2545,15 @@
 
         function wtSendChat(text) {
             if (!isConnected) return;
-            const data = { type:'chat', sender:huidigeGebruiker, text, timestamp:Date.now() };
-            connections.forEach(c => { try { c.send(data); } catch(e) {} });
+            const data = { type: 'chat', sender: huidigeGebruiker, text, timestamp: Date.now() };
+            connections.forEach(c => { try { c.send(data); } catch (e) {} });
             wtAddChat(`📤 ${huidigeGebruiker}`, text);
         }
 
         function wtHandleData(conn, data) {
             if (data.type === 'hello') {
                 wtAddChat(`👋 ${data.username}`, `verbonden`, true);
-                conn.send({ type:'hello_ack', username:huidigeGebruiker });
+                conn.send({ type: 'hello_ack', username: huidigeGebruiker });
                 wtUpdateUserList();
             }
             if (data.type === 'hello_ack') {
@@ -1234,7 +2564,7 @@
                 wtAddChat(`💬 ${data.sender}`, data.text);
                 if (isLeider) {
                     connections.forEach(c => {
-                        if (c !== conn) { try { c.send(data); } catch(e) {} }
+                        if (c !== conn) { try { c.send(data); } catch (e) {} }
                     });
                 }
             }
@@ -1242,9 +2572,10 @@
 
         function wtStartSpeaking() {
             if (isSpeaking) return;
-            if (!isConnected) { wtAddChat('⚠️ Systeem','Niet verbonden!',true); return; }
+            if (!isConnected) { wtAddChat('⚠️ Systeem', 'Niet verbonden!', true); return; }
             if (connections.length === 0 && !isLeider) {
-                wtAddChat('⚠️ Systeem','Niemand verbonden!',true); return;
+                wtAddChat('⚠️ Systeem', 'Niemand verbonden!', true);
+                return;
             }
             isSpeaking = true;
             pttButton.classList.add('active');
@@ -1387,7 +2718,8 @@
         }
 
         function wtDisconnect() {
-            if (peer) { peer.destroy(); peer = null; }
+            if (peer) { peer.destroy();
+                peer = null; }
             connections = [];
             remoteStreams.clear();
             isConnected = false;
@@ -1403,9 +2735,12 @@
         pttButton.addEventListener('mousedown', wtStartSpeaking);
         pttButton.addEventListener('mouseup', wtStopSpeaking);
         pttButton.addEventListener('mouseleave', wtStopSpeaking);
-        pttButton.addEventListener('touchstart', (e) => { e.preventDefault(); wtStartSpeaking(); });
-        pttButton.addEventListener('touchend', (e) => { e.preventDefault(); wtStopSpeaking(); });
-        pttButton.addEventListener('touchcancel', (e) => { e.preventDefault(); wtStopSpeaking(); });
+        pttButton.addEventListener('touchstart', (e) => { e.preventDefault();
+            wtStartSpeaking(); });
+        pttButton.addEventListener('touchend', (e) => { e.preventDefault();
+            wtStopSpeaking(); });
+        pttButton.addEventListener('touchcancel', (e) => { e.preventDefault();
+            wtStopSpeaking(); });
 
         wtChatSendBtn.addEventListener('click', () => {
             const txt = wtChatInput.value.trim();
@@ -1422,10 +2757,49 @@
         });
 
         // ============================================================
+        // POPUP MENU INKLAP/MINIMAX
+        // ============================================================
+        let menuCollapsed = false;
+        let menuMinimized = false;
+
+        document.getElementById('toggleBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            menuCollapsed = !menuCollapsed;
+            document.getElementById('popupMenu').classList.toggle('collapsed', menuCollapsed);
+            this.textContent = menuCollapsed ? '▶' : '◀';
+        });
+
+        document.getElementById('minmaxBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            menuMinimized = !menuMinimized;
+            const menu = document.getElementById('popupMenu');
+            if (menuMinimized) {
+                menu.style.width = 'auto';
+                menu.style.minWidth = '50px';
+                document.getElementById('menuBody').style.display = 'none';
+                document.getElementById('minmaxBtn').textContent = '🗖';
+            } else {
+                menu.style.width = '';
+                menu.style.minWidth = '280px';
+                document.getElementById('menuBody').style.display = '';
+                document.getElementById('minmaxBtn').textContent = '🗕';
+                if (menuCollapsed) {
+                    menu.classList.add('collapsed');
+                }
+            }
+        });
+
+        // Header klik: toggle collapse
+        document.getElementById('menuHeader').addEventListener('click', function(e) {
+            if (e.target.closest('.controls')) return;
+            document.getElementById('toggleBtn').click();
+        });
+
+        // ============================================================
         // START
         // ============================================================
         document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('coordPanel').style.display = 'none';
+        document.getElementById('popupMenu').style.display = 'none';
         document.getElementById('legende').style.display = 'none';
         document.getElementById('locateBtn').style.display = 'none';
         document.getElementById('wtToggleBtn').style.display = 'none';
