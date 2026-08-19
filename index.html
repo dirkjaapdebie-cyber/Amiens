@@ -7,8 +7,10 @@
     <!-- Leaflet voor de kaart -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- PeerJS voor de groepswalkie -->
+    <!-- PeerJS voor groepswalkie -->
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    <!-- QRCode generator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         body { display: flex; height: 100vh; background: #0f172a; color: #e2e8f0; overflow: hidden; }
@@ -20,19 +22,26 @@
         .leaflet-popup-content h3 { margin-top: 0; color: #b91c1c; }
         .leaflet-popup-content strong { color: #1d4ed8; }
 
-        /* Rechterkant: Walkie Talkie Groep */
+        /* Rechterkant: Walkie Talkie + QR */
         #wt-container { flex: 1; min-width: 350px; padding: 20px; background: #1e293b; display: flex; flex-direction: column; border-left: 2px solid #334155; overflow-y: auto; }
         #wt-container h2 { color: #38bdf8; margin-bottom: 10px; font-size: 20px; }
         
-        .id-box { background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 15px; word-break: break-all; font-family: monospace; font-size: 13px; }
+        .qr-area { display: flex; align-items: center; gap: 15px; background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #334155; }
+        #qrCode { width: 100px; height: 100px; background: #fff; padding: 5px; border-radius: 4px; }
+        .id-text { flex: 1; font-size: 13px; word-break: break-all; color: #94a3b8; }
+        .id-text span { color: #fbbf24; font-weight: bold; }
         
-        .group-inputs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
-        .group-inputs input { padding: 8px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #fff; width: 100%; }
-        .group-inputs input:focus { outline: 2px solid #38bdf8; }
+        #copyBtn { background: #3b82f6; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        #copyBtn:hover { background: #2563eb; }
 
-        #connectBtn { padding: 10px; background: #38bdf8; color: #0f172a; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 15px; transition: 0.2s; }
+        .connect-area { display: flex; gap: 10px; margin-bottom: 15px; }
+        .connect-area input { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #fff; }
+        .connect-area input:focus { outline: 2px solid #38bdf8; }
+        #connectBtn { padding: 8px 16px; background: #38bdf8; color: #0f172a; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         #connectBtn:hover { background: #60d5ff; }
-        #connectBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .peer-list { font-size: 13px; color: #94a3b8; margin-bottom: 10px; min-height: 20px; }
+        .peer-list .connected { color: #4ade80; }
 
         /* PTT Knop */
         #pttBtn { width: 100%; padding: 20px; font-size: 22px; background: #ef4444; border: none; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; margin: 10px 0; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); transition: 0.1s; }
@@ -40,7 +49,7 @@
         #pttBtn:disabled { background: #475569; box-shadow: none; }
 
         /* Chat */
-        .chat-area { flex: 1; background: #0f172a; border-radius: 6px; padding: 10px; overflow-y: auto; border: 1px solid #334155; margin: 10px 0; min-height: 100px; max-height: 300px; }
+        .chat-area { flex: 1; background: #0f172a; border-radius: 6px; padding: 10px; overflow-y: auto; border: 1px solid #334155; margin: 10px 0; min-height: 80px; max-height: 250px; }
         .chat-area .msg { margin: 4px 0; font-size: 14px; }
         .chat-area .sys { color: #fbbf24; font-style: italic; }
         .chat-area .me { color: #4ade80; }
@@ -52,7 +61,6 @@
         .chat-input button:disabled { opacity: 0.5; }
 
         .status { font-size: 13px; color: #94a3b8; margin-top: 8px; text-align: center; }
-        .connected-count { color: #4ade80; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -62,32 +70,38 @@
         <div id="map"></div>
     </div>
 
-    <!-- Rechterkant: Walkie Groep -->
+    <!-- Rechterkant: Walkie Groep met QR -->
     <div id="wt-container">
-        <h2>📻 Groepswalkie (4 pers.)</h2>
+        <h2>📻 Groepswalkie (QR)</h2>
         
-        <div>🔑 <strong>Jouw unieke code:</strong></div>
-        <div id="myIdDisplay" class="id-box">Bezig met laden...</div>
-
-        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 5px;">Voeg de codes van de andere 3 groepsleden toe:</div>
-        <div class="group-inputs">
-            <input type="text" id="remoteId1" placeholder="Code persoon 2">
-            <input type="text" id="remoteId2" placeholder="Code persoon 3">
-            <input type="text" id="remoteId3" placeholder="Code persoon 4">
+        <div class="qr-area">
+            <div id="qrCode"></div>
+            <div class="id-text">
+                <div>🔑 <strong>Jouw code</strong> (scan of kopieer):</div>
+                <div id="myIdDisplay" style="font-family: monospace; color: #e2e8f0;">Bezig met laden...</div>
+                <button id="copyBtn" style="margin-top: 5px;">📋 Kopieer code</button>
+            </div>
         </div>
-        <button id="connectBtn">🔗 Verbinden met de groep (start mesh)</button>
+
+        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 5px;">Voeg een groepsgenoot toe (plak de code of scan de QR):</div>
+        <div class="connect-area">
+            <input type="text" id="remoteIdInput" placeholder="Plak hier de code van de ander">
+            <button id="connectBtn">➕ Verbinden</button>
+        </div>
+
+        <div class="peer-list" id="peerList">🤝 Nog geen verbindingen...</div>
 
         <button id="pttBtn" disabled>🎙️ INGEDRUKT HOUDEN OM TE PRATEN</button>
 
         <div class="chat-area" id="chatArea">
-            <div class="msg sys">📡 Start: wacht tot je verbonden bent met de groep...</div>
+            <div class="msg sys">📡 Start: wacht tot je verbonden bent...</div>
         </div>
 
         <div class="chat-input">
             <input type="text" id="chatInput" placeholder="Typ een groepsbericht..." disabled>
             <button id="sendBtn" disabled>📨 Stuur</button>
         </div>
-        <div class="status" id="statusText">⏳ Genereer ID...</div>
+        <div class="status" id="statusText">⏳ Genereer QR...</div>
     </div>
 
     <script>
@@ -98,7 +112,6 @@
             maxZoom: 19
         }).addTo(map);
 
-        // Marker met popup (tekst over crypte & labyrint)
         const marker = L.marker([49.8940, 2.3022]).addTo(map);
         marker.bindPopup(`
             <div style="max-width:280px;">
@@ -106,33 +119,32 @@
                 <p><strong>Adres:</strong> 30 Place Notre Dame, 80000 Amiens</p>
                 <hr>
                 <h4>Over de crypte:</h4>
-                <p>Ja, die is te bezoeken, maar <strong>niet vrij toegankelijk</strong>. De Romaanse crypte (11e eeuw) ligt onder het koor en is het enige restant van de vorige kathedraal. Je kunt hem alleen bezichtigen via een <strong>rondleiding</strong> (meestal georganiseerd door het Office de Tourisme).<br>
-                <em>Let op:</em> Check ter plekke de actuele tijden – vaak alleen open in de zomermaanden. De ingang is via de zuidzijde van het koor.</p>
+                <p>Ja, die is te bezoeken, maar <strong>niet vrij toegankelijk</strong>. De Romaanse crypte (11e eeuw) ligt onder het koor. Alleen via een <strong>rondleiding</strong> (Office de Tourisme).<br>
+                <em>Let op:</em> Check de tijden – vaak alleen open in zomermaanden.</p>
                 
-                <h4>🔎 Het bijzondere plekje:</h4>
-                <p>Zonder twijfel <strong>het labyrint op de vloer van het schip</strong> (midden in de kerk, vlakbij de ingang). Dit zwart-wit marmeren doolhof symboliseert de pelgrimstocht naar het Hemelse Jeruzalem en toont de wiskundige precisie van de 13e-eeuwse bouwmeesters.</p>
-                <p><em>Tip:</em> Het ligt vaak onder de stoelen, maar de kerkwachten kunnen ze voor je wegschuiven als je beleefd vraagt.</p>
+                <h4>🔎 Bijzonder plekje:</h4>
+                <p><strong>het labyrint op de vloer van het schip</strong> (midden in de kerk). Zwart-wit marmeren doolhof, symbool voor de pelgrimstocht. Vraag de kerkwachten om de stoelen even weg te schuiven.</p>
             </div>
         `);
         marker.openPopup();
 
-        // --- 2. GROEPSWALKIE (PEERJS MESH) ---
+        // --- 2. GROEPSWALKIE (PEERJS + QR) ---
         let peer = null;
         let localStream = null;
         const connections = new Map(); // peerId -> DataConnection
-        const audioElements = new Map(); // peerId -> Audio element
-        let connectedPeers = new Set(); // om dubbele verbindingen te voorkomen
+        let connectedPeers = new Set();
+        let myPeerId = '';
 
         const myIdDisplay = document.getElementById('myIdDisplay');
-        const remoteId1 = document.getElementById('remoteId1');
-        const remoteId2 = document.getElementById('remoteId2');
-        const remoteId3 = document.getElementById('remoteId3');
+        const remoteIdInput = document.getElementById('remoteIdInput');
         const connectBtn = document.getElementById('connectBtn');
         const pttBtn = document.getElementById('pttBtn');
         const chatArea = document.getElementById('chatArea');
         const chatInput = document.getElementById('chatInput');
         const sendBtn = document.getElementById('sendBtn');
         const statusText = document.getElementById('statusText');
+        const peerList = document.getElementById('peerList');
+        const copyBtn = document.getElementById('copyBtn');
 
         function addChat(text, type = 'sys') {
             const div = document.createElement('div');
@@ -142,21 +154,39 @@
             chatArea.scrollTop = chatArea.scrollHeight;
         }
 
-        function updateStatus(text) { statusText.textContent = text; }
+        function updatePeerList() {
+            const count = connectedPeers.size;
+            if (count === 0) {
+                peerList.innerHTML = '🤝 Nog geen verbindingen...';
+            } else {
+                peerList.innerHTML = `✅ Verbonden met <span class="connected">${count}</span> groepsleden: ${Array.from(connectedPeers).join(', ')}`;
+            }
+            const enabled = count > 0 && localStream !== null;
+            pttBtn.disabled = !enabled;
+            chatInput.disabled = !enabled;
+            sendBtn.disabled = !enabled;
+            if (enabled) {
+                statusText.textContent = `🟢 Verbonden met ${count} groepsleden (audio klaar)`;
+                pttBtn.style.background = '#ef4444';
+            } else {
+                statusText.textContent = count > 0 ? '⛔ Wacht op microfoon...' : '⛔ Nog geen verbindingen';
+                pttBtn.style.background = '#475569';
+            }
+        }
 
-        // Microfoon initialiseren (staat standaard UIT)
+        // Microfoon init
         navigator.mediaDevices.getUserMedia({ audio: true, video: false })
             .then(stream => {
                 localStream = stream;
-                localStream.getAudioTracks()[0].enabled = false; // mute standaard
-                updateStatus('✅ Microfoon gereed. Wacht op ID...');
+                localStream.getAudioTracks()[0].enabled = false;
+                updatePeerList();
             })
             .catch(err => {
-                addChat(`❌ Geen microfoon toegang: ${err.message}`, 'sys');
-                updateStatus('⚠️ Geen audio mogelijk zonder microfoon.');
+                addChat(`❌ Geen microfoon: ${err.message}`, 'sys');
+                statusText.textContent = '⚠️ Geen audio zonder microfoon.';
             });
 
-        // Peer initialiseren
+        // Peer init + QR
         function initPeer() {
             peer = new Peer(null, {
                 debug: 2,
@@ -164,12 +194,22 @@
             });
 
             peer.on('open', (id) => {
+                myPeerId = id;
                 myIdDisplay.textContent = id;
-                updateStatus('✅ ID actief. Deel deze code met de groep (max 3 anderen).');
-                addChat(`🔑 Jouw ID: ${id}`, 'sys');
+                // Genereer QR-code
+                new QRCode(document.getElementById("qrCode"), {
+                    text: id,
+                    width: 100,
+                    height: 100,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                statusText.textContent = '✅ QR-code gereed. Deel via scan of kopieer.';
+                addChat(`🔑 Jouw ID is gegenereerd`, 'sys');
             });
 
-            // Inkomende data-verbinding (chat)
+            // Inkomende data
             peer.on('connection', (conn) => {
                 const remoteId = conn.peer;
                 if (connectedPeers.has(remoteId)) {
@@ -181,125 +221,90 @@
                 conn.on('data', (data) => addChat(`📨 Ander: ${data}`, 'other'));
                 conn.on('open', () => {
                     addChat(`🔗 ${remoteId} heeft verbinding gemaakt`, 'sys');
-                    updateConnectedCount();
+                    updatePeerList();
                 });
                 conn.on('close', () => {
                     connectedPeers.delete(remoteId);
                     connections.delete(remoteId);
                     addChat(`🔌 ${remoteId} is verbroken`, 'sys');
-                    updateConnectedCount();
+                    updatePeerList();
                 });
             });
 
-            // Inkomende audio-oproep
+            // Inkomende audio
             peer.on('call', (call) => {
-                if (!localStream) {
-                    call.close();
-                    return;
-                }
+                if (!localStream) return call.close();
                 call.answer(localStream);
                 call.on('stream', (remoteStream) => {
                     const audio = new Audio();
                     audio.srcObject = remoteStream;
                     audio.play();
-                    audioElements.set(call.peer, audio);
-                    addChat(`🎧 Audiostream van ${call.peer} actief`, 'sys');
+                    addChat(`🎧 Audio van ${call.peer} actief`, 'sys');
                 });
-                call.on('close', () => {
-                    audioElements.delete(call.peer);
-                    addChat(`📴 Audio van ${call.peer} beëindigd`, 'sys');
-                });
+                call.on('close', () => addChat(`📴 Audio van ${call.peer} beëindigd`, 'sys'));
             });
 
             peer.on('error', (err) => {
                 if (err.type === 'unavailable-id') {
                     peer.destroy();
-                    peer = null;
                     initPeer();
-                    return;
+                } else {
+                    addChat(`⚠️ Fout: ${err.message}`, 'sys');
                 }
-                addChat(`⚠️ Fout: ${err.message}`, 'sys');
             });
         }
         initPeer();
 
-        // Verbind met 3 anderen (mesh)
+        // Verbinden met één persoon (via QR of geplakte code)
         connectBtn.onclick = () => {
-            if (!localStream) {
-                addChat('❌ Microfoon niet beschikbaar. Herlaad de pagina.', 'sys');
-                return;
-            }
-            const ids = [remoteId1.value.trim(), remoteId2.value.trim(), remoteId3.value.trim()].filter(id => id !== '');
-            if (ids.length === 0) {
-                addChat('❌ Vul minstens 1 code in van een ander groepslid.', 'sys');
-                return;
-            }
-            const myId = myIdDisplay.textContent;
-            if (ids.includes(myId)) {
-                addChat('❌ Je kunt niet met jezelf verbinden.', 'sys');
-                return;
-            }
+            const remoteId = remoteIdInput.value.trim();
+            if (!remoteId) { addChat('❌ Plak eerst een code.', 'sys'); return; }
+            if (remoteId === myPeerId) { addChat('❌ Je kunt niet met jezelf verbinden.', 'sys'); return; }
+            if (connectedPeers.has(remoteId)) { addChat(`ℹ️ Al verbonden met ${remoteId}`, 'sys'); return; }
 
-            connectBtn.disabled = true;
-            addChat(`⏳ Bezig met verbinden naar ${ids.length} groepsleden...`, 'sys');
+            addChat(`⏳ Verbinden met ${remoteId}...`, 'sys');
 
-            ids.forEach(remoteId => {
-                if (connectedPeers.has(remoteId)) {
-                    addChat(`ℹ️ Al verbonden met ${remoteId}`, 'sys');
-                    return;
-                }
+            // Data connectie
+            const conn = peer.connect(remoteId, { reliable: true });
+            conn.on('open', () => {
+                connectedPeers.add(remoteId);
+                connections.set(remoteId, conn);
+                addChat(`🔗 Verbonden met ${remoteId}`, 'sys');
+                updatePeerList();
+            });
+            conn.on('data', (data) => addChat(`📨 Ander: ${data}`, 'other'));
+            conn.on('close', () => {
+                connectedPeers.delete(remoteId);
+                connections.delete(remoteId);
+                addChat(`🔌 Verbinding met ${remoteId} verbroken`, 'sys');
+                updatePeerList();
+            });
 
-                // Data connectie
-                const conn = peer.connect(remoteId, { reliable: true });
-                conn.on('open', () => {
-                    connectedPeers.add(remoteId);
-                    connections.set(remoteId, conn);
-                    addChat(`🔗 Verbonden met ${remoteId}`, 'sys');
-                    updateConnectedCount();
-                });
-                conn.on('data', (data) => addChat(`📨 Ander: ${data}`, 'other'));
-                conn.on('close', () => {
-                    connectedPeers.delete(remoteId);
-                    connections.delete(remoteId);
-                    addChat(`🔌 Verbinding met ${remoteId} verbroken`, 'sys');
-                    updateConnectedCount();
-                });
-
-                // Audio oproep
+            // Audio call
+            if (localStream) {
                 const call = peer.call(remoteId, localStream);
                 call.on('stream', (remoteStream) => {
                     const audio = new Audio();
                     audio.srcObject = remoteStream;
                     audio.play();
-                    audioElements.set(remoteId, audio);
                     addChat(`🎧 Audio met ${remoteId} actief`, 'sys');
                 });
-                call.on('close', () => {
-                    audioElements.delete(remoteId);
-                    addChat(`📴 Audio met ${remoteId} beëindigd`, 'sys');
-                });
-            });
+                call.on('close', () => addChat(`📴 Audio met ${remoteId} beëindigd`, 'sys'));
+            }
 
-            setTimeout(() => { connectBtn.disabled = false; }, 1000);
+            remoteIdInput.value = '';
         };
 
-        // Aantal verbindingen bijwerken
-        function updateConnectedCount() {
-            const count = connectedPeers.size;
-            const enabled = count > 0;
-            pttBtn.disabled = !enabled || !localStream;
-            chatInput.disabled = !enabled;
-            sendBtn.disabled = !enabled;
-            if (enabled) {
-                updateStatus(`🟢 Verbonden met ${count} groepsleden (audio klaar)`);
-                pttBtn.style.background = '#ef4444';
-            } else {
-                updateStatus('⛔ Nog geen verbindingen');
-                pttBtn.style.background = '#475569';
-            }
-        }
+        // Copy naar klembord
+        copyBtn.onclick = () => {
+            navigator.clipboard.writeText(myPeerId).then(() => {
+                addChat('✅ Code gekopieerd naar klembord!', 'sys');
+            }).catch(() => {
+                addChat('⚠️ Kon niet kopiëren, selecteer handmatig.', 'sys');
+            });
+        };
 
-        // Push-to-talk (groepsaudio)
+        // Push-to-talk (groep)
         pttBtn.addEventListener('mousedown', () => {
             if (!localStream || connectedPeers.size === 0) return;
             localStream.getAudioTracks()[0].enabled = true;
@@ -314,7 +319,7 @@
             pttBtn.textContent = '🎙️ INGEDRUKT HOUDEN OM TE PRATEN';
         });
 
-        // Groepsbericht versturen
+        // Groepsbericht
         sendBtn.onclick = () => {
             const msg = chatInput.value.trim();
             if (!msg || connectedPeers.size === 0) return;
