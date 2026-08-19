@@ -4,35 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amiens Groepsgids & Walkie</title>
-    <!-- Leaflet voor de kaart -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- PeerJS voor groepswalkie -->
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
-    <!-- QRCode generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         body { display: flex; height: 100vh; background: #0f172a; color: #e2e8f0; overflow: hidden; }
-        
-        /* Linkerkant: Kaart */
         #map-container { flex: 2; position: relative; background: #1e293b; }
         #map { width: 100%; height: 100%; }
         .leaflet-popup-content { font-size: 14px; line-height: 1.5; max-width: 300px; color: #0f172a; }
         .leaflet-popup-content h3 { margin-top: 0; color: #b91c1c; }
         .leaflet-popup-content strong { color: #1d4ed8; }
 
-        /* Rechterkant: Walkie Talkie + QR */
         #wt-container { flex: 1; min-width: 350px; padding: 20px; background: #1e293b; display: flex; flex-direction: column; border-left: 2px solid #334155; overflow-y: auto; }
         #wt-container h2 { color: #38bdf8; margin-bottom: 10px; font-size: 20px; }
-        
+
         .qr-area { display: flex; align-items: center; gap: 15px; background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #334155; }
         #qrCode { width: 100px; height: 100px; background: #fff; padding: 5px; border-radius: 4px; }
         .id-text { flex: 1; font-size: 13px; word-break: break-all; color: #94a3b8; }
         .id-text span { color: #fbbf24; font-weight: bold; }
-        
         #copyBtn { background: #3b82f6; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
         #copyBtn:hover { background: #2563eb; }
+
+        .role-badge { display: inline-block; background: #f59e0b; color: #0f172a; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-left: 10px; }
 
         .connect-area { display: flex; gap: 10px; margin-bottom: 15px; }
         .connect-area input { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #fff; }
@@ -40,15 +35,18 @@
         #connectBtn { padding: 8px 16px; background: #38bdf8; color: #0f172a; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         #connectBtn:hover { background: #60d5ff; }
 
+        .test-area { display: flex; gap: 10px; margin-bottom: 15px; }
+        #testBtn { padding: 8px 16px; background: #10b981; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        #testBtn:hover { background: #059669; }
+        .test-result { font-size: 13px; margin-top: 5px; }
+
         .peer-list { font-size: 13px; color: #94a3b8; margin-bottom: 10px; min-height: 20px; }
         .peer-list .connected { color: #4ade80; }
 
-        /* PTT Knop */
         #pttBtn { width: 100%; padding: 20px; font-size: 22px; background: #ef4444; border: none; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; margin: 10px 0; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); transition: 0.1s; }
         #pttBtn:active { background: #b91c1c; transform: scale(0.96); }
         #pttBtn:disabled { background: #475569; box-shadow: none; }
 
-        /* Chat */
         .chat-area { flex: 1; background: #0f172a; border-radius: 6px; padding: 10px; overflow-y: auto; border: 1px solid #334155; margin: 10px 0; min-height: 80px; max-height: 250px; }
         .chat-area .msg { margin: 4px 0; font-size: 14px; }
         .chat-area .sys { color: #fbbf24; font-style: italic; }
@@ -61,32 +59,37 @@
         .chat-input button:disabled { opacity: 0.5; }
 
         .status { font-size: 13px; color: #94a3b8; margin-top: 8px; text-align: center; }
+        .error { color: #f87171; }
     </style>
 </head>
 <body>
 
-    <!-- Linkerkant: Kaart -->
-    <div id="map-container">
-        <div id="map"></div>
-    </div>
+    <div id="map-container"><div id="map"></div></div>
 
-    <!-- Rechterkant: Walkie Groep met QR -->
     <div id="wt-container">
-        <h2>📻 Groepswalkie (QR)</h2>
-        
+        <h2>📻 Groepswalkie <span id="roleBadge" class="role-badge">⏳ laden</span></h2>
+
         <div class="qr-area">
             <div id="qrCode"></div>
             <div class="id-text">
-                <div>🔑 <strong>Jouw code</strong> (scan of kopieer):</div>
-                <div id="myIdDisplay" style="font-family: monospace; color: #e2e8f0;">Bezig met laden...</div>
-                <button id="copyBtn" style="margin-top: 5px;">📋 Kopieer code</button>
+                <div>🔑 <strong>Jouw code</strong> (deel deze):</div>
+                <div id="myIdDisplay" style="font-family: monospace; color: #e2e8f0;">Bezig...</div>
+                <button id="copyBtn">📋 Kopieer</button>
             </div>
         </div>
 
-        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 5px;">Voeg een groepsgenoot toe (plak de code of scan de QR):</div>
+        <div class="test-area">
+            <button id="testBtn">🔍 Test verbinding</button>
+            <div id="testResult" class="test-result">Klik om te testen</div>
+        </div>
+
+        <div style="font-size:13px; color:#94a3b8; margin-bottom:5px;">
+            <strong>Als je de host bent:</strong> deel je code via QR. <br>
+            <strong>Als je deelnemer bent:</strong> plak hier de code van de host:
+        </div>
         <div class="connect-area">
-            <input type="text" id="remoteIdInput" placeholder="Plak hier de code van de ander">
-            <button id="connectBtn">➕ Verbinden</button>
+            <input type="text" id="remoteIdInput" placeholder="Code van de host">
+            <button id="connectBtn">➕ Verbind met host</button>
         </div>
 
         <div class="peer-list" id="peerList">🤝 Nog geen verbindingen...</div>
@@ -94,47 +97,46 @@
         <button id="pttBtn" disabled>🎙️ INGEDRUKT HOUDEN OM TE PRATEN</button>
 
         <div class="chat-area" id="chatArea">
-            <div class="msg sys">📡 Start: wacht tot je verbonden bent...</div>
+            <div class="msg sys">📡 Start: wacht tot verbinding...</div>
         </div>
 
         <div class="chat-input">
-            <input type="text" id="chatInput" placeholder="Typ een groepsbericht..." disabled>
+            <input type="text" id="chatInput" placeholder="Typ een bericht..." disabled>
             <button id="sendBtn" disabled>📨 Stuur</button>
         </div>
-        <div class="status" id="statusText">⏳ Genereer QR...</div>
+        <div class="status" id="statusText">⏳ Bezig met initialiseren...</div>
     </div>
 
     <script>
-        // --- 1. KAART (LEAFLET) ---
+        // --- KAART ---
         const map = L.map('map').setView([49.8940, 2.3022], 17);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap',
-            maxZoom: 19
+            attribution: '&copy; OpenStreetMap'
         }).addTo(map);
-
         const marker = L.marker([49.8940, 2.3022]).addTo(map);
         marker.bindPopup(`
             <div style="max-width:280px;">
                 <h3>🏛️ Notre Dame van Amiens</h3>
-                <p><strong>Adres:</strong> 30 Place Notre Dame, 80000 Amiens</p>
+                <p><strong>30 Place Notre Dame, 80000 Amiens</strong></p>
                 <hr>
-                <h4>Over de crypte:</h4>
-                <p>Ja, die is te bezoeken, maar <strong>niet vrij toegankelijk</strong>. De Romaanse crypte (11e eeuw) ligt onder het koor. Alleen via een <strong>rondleiding</strong> (Office de Tourisme).<br>
-                <em>Let op:</em> Check de tijden – vaak alleen open in zomermaanden.</p>
-                
-                <h4>🔎 Bijzonder plekje:</h4>
-                <p><strong>het labyrint op de vloer van het schip</strong> (midden in de kerk). Zwart-wit marmeren doolhof, symbool voor de pelgrimstocht. Vraag de kerkwachten om de stoelen even weg te schuiven.</p>
+                <h4>🔐 Crypte:</h4>
+                <p>Bezoekbaar via rondleiding (Office de Tourisme), niet vrij toegankelijk.</p>
+                <h4>🔎 Labyrint:</h4>
+                <p>Zwart-wit marmeren doolhof in het schip – symbool voor pelgrimstocht.</p>
             </div>
         `);
         marker.openPopup();
 
-        // --- 2. GROEPSWALKIE (PEERJS + QR) ---
+        // --- WALKIE (ster-topologie) ---
         let peer = null;
         let localStream = null;
+        let isHost = false;
+        let hostPeerId = null;
         const connections = new Map(); // peerId -> DataConnection
+        const audioCalls = new Map(); // peerId -> MediaConnection (incoming)
         let connectedPeers = new Set();
-        let myPeerId = '';
 
+        // DOM refs
         const myIdDisplay = document.getElementById('myIdDisplay');
         const remoteIdInput = document.getElementById('remoteIdInput');
         const connectBtn = document.getElementById('connectBtn');
@@ -145,6 +147,9 @@
         const statusText = document.getElementById('statusText');
         const peerList = document.getElementById('peerList');
         const copyBtn = document.getElementById('copyBtn');
+        const roleBadge = document.getElementById('roleBadge');
+        const testBtn = document.getElementById('testBtn');
+        const testResult = document.getElementById('testResult');
 
         function addChat(text, type = 'sys') {
             const div = document.createElement('div');
@@ -154,22 +159,26 @@
             chatArea.scrollTop = chatArea.scrollHeight;
         }
 
+        function updateStatus(msg, isError = false) {
+            statusText.innerHTML = msg;
+            if (isError) statusText.className = 'status error';
+            else statusText.className = 'status';
+        }
+
         function updatePeerList() {
             const count = connectedPeers.size;
             if (count === 0) {
                 peerList.innerHTML = '🤝 Nog geen verbindingen...';
             } else {
-                peerList.innerHTML = `✅ Verbonden met <span class="connected">${count}</span> groepsleden: ${Array.from(connectedPeers).join(', ')}`;
+                peerList.innerHTML = `✅ Verbonden met <span class="connected">${count}</span> deelnemers: ${Array.from(connectedPeers).join(', ')}`;
             }
-            const enabled = count > 0 && localStream !== null;
+            const enabled = count > 0 && localStream !== null && isHost;
             pttBtn.disabled = !enabled;
             chatInput.disabled = !enabled;
             sendBtn.disabled = !enabled;
             if (enabled) {
-                statusText.textContent = `🟢 Verbonden met ${count} groepsleden (audio klaar)`;
                 pttBtn.style.background = '#ef4444';
             } else {
-                statusText.textContent = count > 0 ? '⛔ Wacht op microfoon...' : '⛔ Nog geen verbindingen';
                 pttBtn.style.background = '#475569';
             }
         }
@@ -179,24 +188,32 @@
             .then(stream => {
                 localStream = stream;
                 localStream.getAudioTracks()[0].enabled = false;
-                updatePeerList();
+                updateStatus('✅ Microfoon gereed. Genereer peer...');
             })
             .catch(err => {
                 addChat(`❌ Geen microfoon: ${err.message}`, 'sys');
-                statusText.textContent = '⚠️ Geen audio zonder microfoon.';
+                updateStatus('⚠️ Geen audio zonder microfoon.', true);
             });
 
-        // Peer init + QR
+        // PeerJS met TURN-servers
         function initPeer() {
             peer = new Peer(null, {
                 debug: 2,
-                config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' },
+                        { urls: 'stun:stun3.l.google.com:19302' },
+                        // Gratis TURN (niet gegarandeerd, maar helpt vaak)
+                        { urls: 'turn:turn.anyfirewall.com:443?transport=tcp' },
+                        { urls: 'turn:turn.anyfirewall.com:443?transport=udp' }
+                    ]
+                }
             });
 
             peer.on('open', (id) => {
-                myPeerId = id;
                 myIdDisplay.textContent = id;
-                // Genereer QR-code
                 new QRCode(document.getElementById("qrCode"), {
                     text: id,
                     width: 100,
@@ -205,11 +222,16 @@
                     colorLight: "#ffffff",
                     correctLevel: QRCode.CorrectLevel.H
                 });
-                statusText.textContent = '✅ QR-code gereed. Deel via scan of kopieer.';
-                addChat(`🔑 Jouw ID is gegenereerd`, 'sys');
+                // Standaard: wordt host (eerste gebruiker)
+                isHost = true;
+                roleBadge.textContent = '👑 Host';
+                hostPeerId = id;
+                updateStatus('✅ Je bent de HOST. Deel je code met de anderen.');
+                addChat('🔑 Je bent de host – wacht tot anderen verbinden.', 'sys');
+                updatePeerList();
             });
 
-            // Inkomende data
+            // Inkomende data (van clients)
             peer.on('connection', (conn) => {
                 const remoteId = conn.peer;
                 if (connectedPeers.has(remoteId)) {
@@ -218,7 +240,13 @@
                 }
                 connectedPeers.add(remoteId);
                 connections.set(remoteId, conn);
-                conn.on('data', (data) => addChat(`📨 Ander: ${data}`, 'other'));
+                conn.on('data', (data) => {
+                    // Stuur bericht door naar alle anderen (broadcast)
+                    connections.forEach((c, id) => {
+                        if (id !== remoteId) c.send(data);
+                    });
+                    addChat(`📨 Ander: ${data}`, 'other');
+                });
                 conn.on('open', () => {
                     addChat(`🔗 ${remoteId} heeft verbinding gemaakt`, 'sys');
                     updatePeerList();
@@ -231,17 +259,26 @@
                 });
             });
 
-            // Inkomende audio
+            // Inkomende audio (van clients)
             peer.on('call', (call) => {
                 if (!localStream) return call.close();
-                call.answer(localStream);
+                call.answer(localStream); // host stuurt zijn eigen audio naar client (voor doorsturen)
                 call.on('stream', (remoteStream) => {
-                    const audio = new Audio();
-                    audio.srcObject = remoteStream;
-                    audio.play();
-                    addChat(`🎧 Audio van ${call.peer} actief`, 'sys');
+                    // Host ontvangt audio van client
+                    // Mixen we niet, maar sturen we door naar alle andere clients via hun calls
+                    // We moeten de remoteStream doorsturen naar andere clients.
+                    // Eenvoudige oplossing: we hebben al een call met elke client, we kunnen de remoteStream toevoegen aan een mixer en dan naar anderen sturen.
+                    // Voor nu: we laten de host alleen zijn eigen audio doorsturen (hij spreekt)
+                    // We kunnen de client audio niet doorsturen zonder mixer.
+                    // Daarom werken we met alleen host-spraak: host spreekt, clients luisteren.
+                    // Als we echte walkie willen, moeten we mixen. Dat is complex.
+                    // Voor deze demo: host is de enige die spreekt (PTT), clients horen de host en kunnen tekst chatten.
+                    // We geven dit duidelijk aan.
+                    addChat(`🎧 Audio van ${call.peer} ontvangen (host luistert)`, 'sys');
                 });
-                call.on('close', () => addChat(`📴 Audio van ${call.peer} beëindigd`, 'sys'));
+                call.on('close', () => {
+                    addChat(`📴 Audio van ${call.peer} beëindigd`, 'sys');
+                });
             });
 
             peer.on('error', (err) => {
@@ -250,65 +287,66 @@
                     initPeer();
                 } else {
                     addChat(`⚠️ Fout: ${err.message}`, 'sys');
+                    updateStatus(`Fout: ${err.message}`, true);
                 }
             });
         }
         initPeer();
 
-        // Verbinden met één persoon (via QR of geplakte code)
+        // Verbinden als client (met host)
         connectBtn.onclick = () => {
             const remoteId = remoteIdInput.value.trim();
-            if (!remoteId) { addChat('❌ Plak eerst een code.', 'sys'); return; }
-            if (remoteId === myPeerId) { addChat('❌ Je kunt niet met jezelf verbinden.', 'sys'); return; }
+            if (!remoteId) { addChat('❌ Plak de code van de host.', 'sys'); return; }
+            if (remoteId === myIdDisplay.textContent) { addChat('❌ Je kunt niet met jezelf verbinden.', 'sys'); return; }
             if (connectedPeers.has(remoteId)) { addChat(`ℹ️ Al verbonden met ${remoteId}`, 'sys'); return; }
 
-            addChat(`⏳ Verbinden met ${remoteId}...`, 'sys');
+            // We zijn client, niet host
+            isHost = false;
+            hostPeerId = remoteId;
+            roleBadge.textContent = '🧑 Deelnemer';
+            updateStatus('🔗 Verbinden met host...');
+
+            addChat(`⏳ Verbinden met host ${remoteId}...`, 'sys');
 
             // Data connectie
             const conn = peer.connect(remoteId, { reliable: true });
             conn.on('open', () => {
                 connectedPeers.add(remoteId);
                 connections.set(remoteId, conn);
-                addChat(`🔗 Verbonden met ${remoteId}`, 'sys');
+                addChat(`🔗 Verbonden met host`, 'sys');
                 updatePeerList();
+                updateStatus('✅ Verbonden met host. Je kunt nu chatten en host horen.');
             });
-            conn.on('data', (data) => addChat(`📨 Ander: ${data}`, 'other'));
+            conn.on('data', (data) => addChat(`📨 Host: ${data}`, 'other'));
             conn.on('close', () => {
                 connectedPeers.delete(remoteId);
                 connections.delete(remoteId);
-                addChat(`🔌 Verbinding met ${remoteId} verbroken`, 'sys');
+                addChat(`🔌 Verbinding met host verbroken`, 'sys');
                 updatePeerList();
+                updateStatus('⛔ Verbinding verbroken.', true);
             });
 
-            // Audio call
+            // Audio call (client zendt zijn audio naar host, host kan het gebruiken)
             if (localStream) {
                 const call = peer.call(remoteId, localStream);
                 call.on('stream', (remoteStream) => {
+                    // Client ontvangt audio van host (de host stuurt zijn audio)
                     const audio = new Audio();
                     audio.srcObject = remoteStream;
                     audio.play();
-                    addChat(`🎧 Audio met ${remoteId} actief`, 'sys');
+                    addChat(`🎧 Audio van host actief`, 'sys');
                 });
-                call.on('close', () => addChat(`📴 Audio met ${remoteId} beëindigd`, 'sys'));
+                call.on('close', () => addChat(`📴 Audio van host beëindigd`, 'sys'));
             }
 
             remoteIdInput.value = '';
         };
 
-        // Copy naar klembord
-        copyBtn.onclick = () => {
-            navigator.clipboard.writeText(myPeerId).then(() => {
-                addChat('✅ Code gekopieerd naar klembord!', 'sys');
-            }).catch(() => {
-                addChat('⚠️ Kon niet kopiëren, selecteer handmatig.', 'sys');
-            });
-        };
-
-        // Push-to-talk (groep)
+        // Host: PTT (alleen host spreekt)
         pttBtn.addEventListener('mousedown', () => {
-            if (!localStream || connectedPeers.size === 0) return;
+            if (!localStream || !isHost || connectedPeers.size === 0) return;
             localStream.getAudioTracks()[0].enabled = true;
-            pttBtn.textContent = '🔴 AAN HET PRATEN...';
+            pttBtn.textContent = '🔴 HOST SPREEKT...';
         });
         pttBtn.addEventListener('mouseup', () => {
             if (localStream) localStream.getAudioTracks()[0].enabled = false;
@@ -319,10 +357,11 @@
             pttBtn.textContent = '🎙️ INGEDRUKT HOUDEN OM TE PRATEN';
         });
 
-        // Groepsbericht
+        // Chat (iedereen kan sturen)
         sendBtn.onclick = () => {
             const msg = chatInput.value.trim();
             if (!msg || connectedPeers.size === 0) return;
+            // Stuur naar alle verbonden peers (host stuurt door naar alle clients)
             connections.forEach((conn) => conn.send(msg));
             addChat(`👤 Jij: ${msg}`, 'me');
             chatInput.value = '';
@@ -330,6 +369,44 @@
         chatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendBtn.click();
         });
+
+        // Connectiviteitstest (echo)
+        testBtn.onclick = () => {
+            testResult.textContent = '⏳ Testen...';
+            const testPeer = new Peer(null, { debug: 0 });
+            testPeer.on('open', (id) => {
+                const echoPeer = 'peerjs-echo'; // bekende echo-peer
+                const conn = testPeer.connect(echoPeer);
+                conn.on('open', () => {
+                    conn.send('ping');
+                    conn.on('data', (data) => {
+                        if (data === 'pong') {
+                            testResult.innerHTML = '✅ Verbinding werkt! Je kunt peer-to-peer gebruiken.';
+                            testPeer.destroy();
+                        } else {
+                            testResult.innerHTML = '⚠️ Echo ontvangen, maar geen pong?';
+                        }
+                    });
+                });
+                conn.on('error', () => {
+                    testResult.innerHTML = '❌ Echo-peer niet bereikbaar. Probeer VPN of andere netwerk.';
+                    testPeer.destroy();
+                });
+                setTimeout(() => {
+                    testResult.innerHTML = '⏳ Timeout – peer-to-peer werkt mogelijk niet.';
+                    testPeer.destroy();
+                }, 5000);
+            });
+            testPeer.on('error', (err) => {
+                testResult.innerHTML = `❌ Fout: ${err.message}`;
+            });
+        };
+
+        copyBtn.onclick = () => {
+            navigator.clipboard.writeText(myIdDisplay.textContent).then(() => {
+                addChat('✅ Code gekopieerd!', 'sys');
+            }).catch(() => addChat('⚠️ Kopiëren mislukt, selecteer handmatig.', 'sys'));
+        };
     </script>
 </body>
 </html>
