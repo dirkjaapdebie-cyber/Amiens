@@ -3,150 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amiens & Walkie Talkie</title>
-    <!-- PeerJS voor realtime audio en chat -->
+    <title>Amiens Groepsgids & Walkie</title>
+    <!-- Leaflet voor de kaart -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- PeerJS voor de groepswalkie -->
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #1a1a2e; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        body { display: flex; height: 100vh; background: #0f172a; color: #e2e8f0; overflow: hidden; }
         
-        #openBtn {
-            padding: 15px 30px; font-size: 18px; background: #e94560; color: #fff;
-            border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
-            transition: 0.3s;
-        }
-        #openBtn:hover { transform: scale(1.05); background: #c2314d; }
+        /* Linkerkant: Kaart */
+        #map-container { flex: 2; position: relative; background: #1e293b; }
+        #map { width: 100%; height: 100%; }
+        .leaflet-popup-content { font-size: 14px; line-height: 1.5; max-width: 300px; color: #0f172a; }
+        .leaflet-popup-content h3 { margin-top: 0; color: #b91c1c; }
+        .leaflet-popup-content strong { color: #1d4ed8; }
 
-        /* Pop-up (modal) */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000;
-        }
-        .modal.active { display: flex; }
-        .modal-content {
-            background: #16213e; color: #eee; width: 90%; max-width: 1000px;
-            border-radius: 16px; padding: 20px; position: relative; max-height: 90vh; overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .close {
-            position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer;
-            color: #aaa; transition: 0.2s;
-        }
-        .close:hover { color: #fff; }
+        /* Rechterkant: Walkie Talkie Groep */
+        #wt-container { flex: 1; min-width: 350px; padding: 20px; background: #1e293b; display: flex; flex-direction: column; border-left: 2px solid #334155; overflow-y: auto; }
+        #wt-container h2 { color: #38bdf8; margin-bottom: 10px; font-size: 20px; }
+        
+        .id-box { background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 15px; word-break: break-all; font-family: monospace; font-size: 13px; }
+        
+        .group-inputs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .group-inputs input { padding: 8px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #fff; width: 100%; }
+        .group-inputs input:focus { outline: 2px solid #38bdf8; }
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px; }
-        @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+        #connectBtn { padding: 10px; background: #38bdf8; color: #0f172a; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 15px; transition: 0.2s; }
+        #connectBtn:hover { background: #60d5ff; }
+        #connectBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Linkerkolom: tekst over Amiens */
-        .info-box {
-            background: #1f2a4a; padding: 20px; border-radius: 12px; line-height: 1.6;
-            border-left: 4px solid #e94560;
-        }
-        .info-box h2 { margin-top: 0; color: #e94560; }
-        .info-box h3 { color: #f5a623; margin-bottom: 5px; }
-        .info-box p { margin: 10px 0; }
+        /* PTT Knop */
+        #pttBtn { width: 100%; padding: 20px; font-size: 22px; background: #ef4444; border: none; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; margin: 10px 0; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); transition: 0.1s; }
+        #pttBtn:active { background: #b91c1c; transform: scale(0.96); }
+        #pttBtn:disabled { background: #475569; box-shadow: none; }
 
-        /* Rechterkolom: walkie talkie */
-        .wt-box { background: #0f1626; padding: 20px; border-radius: 12px; border: 1px solid #2a3a5a; }
-        .wt-box h3 { margin-top: 0; color: #6bcb7a; text-align: center; }
-        .id-display { background: #0b0f1a; padding: 10px; border-radius: 6px; word-break: break-all; margin: 10px 0; font-family: monospace; font-size: 14px; border: 1px solid #444; }
-        .controls { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
-        .controls input { flex: 1; min-width: 120px; padding: 8px; border-radius: 6px; border: none; background: #1f2a4a; color: #fff; }
-        .controls button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; background: #2a4a7a; color: #fff; font-weight: bold; }
-        .controls button:hover { background: #3a5a9a; }
-        .controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+        /* Chat */
+        .chat-area { flex: 1; background: #0f172a; border-radius: 6px; padding: 10px; overflow-y: auto; border: 1px solid #334155; margin: 10px 0; min-height: 100px; max-height: 300px; }
+        .chat-area .msg { margin: 4px 0; font-size: 14px; }
+        .chat-area .sys { color: #fbbf24; font-style: italic; }
+        .chat-area .me { color: #4ade80; }
+        .chat-area .other { color: #93c5fd; }
 
-        #pttBtn {
-            width: 100%; padding: 20px; font-size: 22px; background: #e94560; border: none;
-            border-radius: 50px; color: #fff; font-weight: bold; cursor: pointer;
-            box-shadow: 0 4px 10px rgba(233, 69, 96, 0.3); margin: 15px 0; transition: 0.1s;
-        }
-        #pttBtn:active { background: #b52b44; transform: scale(0.96); }
-        #pttBtn:disabled { background: #555; box-shadow: none; }
+        .chat-input { display: flex; gap: 10px; margin-top: 5px; }
+        .chat-input input { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #fff; }
+        .chat-input button { padding: 8px 16px; background: #4ade80; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #0f172a; }
+        .chat-input button:disabled { opacity: 0.5; }
 
-        .chat-area { background: #0b0f1a; height: 120px; overflow-y: auto; padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #333; font-size: 14px; }
-        .chat-area .msg { margin: 4px 0; }
-        .chat-area .msg.system { color: #f5a623; font-style: italic; }
-        .chat-area .msg.me { color: #6bcb7a; }
-        .chat-area .msg.other { color: #88c0d0; }
-
-        .chat-input { display: flex; gap: 10px; }
-        .chat-input input { flex: 1; padding: 8px; border-radius: 6px; border: none; background: #1f2a4a; color: #fff; }
-        .chat-input button { padding: 8px 16px; background: #6bcb7a; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: #0f1626; }
-        .chat-input button:hover { background: #5ab569; }
-
-        .status { margin-top: 10px; font-size: 13px; color: #aaa; text-align: center; }
-        .badge-admin { background: #f5a623; color: #0f1626; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-left: 5px; }
+        .status { font-size: 13px; color: #94a3b8; margin-top: 8px; text-align: center; }
+        .connected-count { color: #4ade80; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <button id="openBtn">📢 Open Amiens-gids & Walkie Talkie</button>
+    <!-- Linkerkant: Kaart -->
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
 
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div class="grid">
-                <!-- Linkerkolom: Informatie over Amiens (jouw tekst) -->
-                <div class="info-box">
-                    <h2>🏛️ Notre Dame van Amiens</h2>
-                    <h3>Over de crypte:</h3>
-                    <p>Ja, die is te bezoeken, maar <strong>niet vrij toegankelijk</strong>. De Romaanse crypte (11e eeuw) ligt onder het koor en is het enige restant van de vorige kathedraal. Je kunt hem alleen bezichtigen via een <strong>rondleiding</strong> (meestal georganiseerd door het Office de Tourisme of de kathedraal zelf).<br>
-                    <em>Let op:</em> Check ter plekke de actuele tijden – vaak is hij alleen open in de zomermaanden of tijdens erfgoeddagen. De ingang is meestal via de zuidzijde van het koor, maar zonder gids kom je er niet in.</p>
-                    
-                    <h3>🔎 Het bijzondere plekje voor inzicht:</h3>
-                    <p>Zonder twijfel is dat <strong>het labyrint op de vloer van het schip</strong> (midden in de kerk, vlakbij de ingang). Dit zwart-wit marmeren doolhof geeft je letterlijk een blik op de middeleeuwse ziel van de kerk: het symboliseert de pelgrimstocht naar het Hemelse Jeruzalem, en de geometrie toont de wiskundige precisie van de 13e-eeuwse bouwmeesters.<br>
-                    <em>Tip:</em> Het ligt vaak onder de stoelen, maar je kunt het patroon goed zien op een plattegrond of – als je beleefd vraagt – kunnen de kerkwachten de stoelen even wegschuiven. Daarnaast geeft de <strong>crypte zelf</strong> het mooiste historische inzicht, omdat je daar de fundamenten van de vorige kerk ziet.</p>
-                </div>
+    <!-- Rechterkant: Walkie Groep -->
+    <div id="wt-container">
+        <h2>📻 Groepswalkie (4 pers.)</h2>
+        
+        <div>🔑 <strong>Jouw unieke code:</strong></div>
+        <div id="myIdDisplay" class="id-box">Bezig met laden...</div>
 
-                <!-- Rechterkolom: Walkie Talkie -->
-                <div class="wt-box">
-                    <h3>📻 Walkie Talkie <span class="badge-admin">Iedereen is beheerder</span></h3>
-                    
-                    <div>🔑 <strong>Jouw unieke code (deel deze):</strong></div>
-                    <div id="myIdDisplay" class="id-display">Bezig met genereren...</div>
-
-                    <div class="controls">
-                        <input type="text" id="remoteIdInput" placeholder="Code van de ander invullen">
-                        <button id="connectBtn">🔗 Verbinden</button>
-                    </div>
-
-                    <button id="pttBtn" disabled>🎙️ INGEDRUKT HOUDEN OM TE PRATEN</button>
-
-                    <div class="chat-area" id="chatArea">
-                        <div class="msg system">📡 Start: wacht op verbinding...</div>
-                    </div>
-
-                    <div class="chat-input">
-                        <input type="text" id="chatInput" placeholder="Typ een bericht..." disabled>
-                        <button id="sendBtn" disabled>📨 Verstuur</button>
-                    </div>
-                    <div class="status" id="statusText">⏳ Wachten op Peer-ID...</div>
-                </div>
-            </div>
+        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 5px;">Voeg de codes van de andere 3 groepsleden toe:</div>
+        <div class="group-inputs">
+            <input type="text" id="remoteId1" placeholder="Code persoon 2">
+            <input type="text" id="remoteId2" placeholder="Code persoon 3">
+            <input type="text" id="remoteId3" placeholder="Code persoon 4">
         </div>
+        <button id="connectBtn">🔗 Verbinden met de groep (start mesh)</button>
+
+        <button id="pttBtn" disabled>🎙️ INGEDRUKT HOUDEN OM TE PRATEN</button>
+
+        <div class="chat-area" id="chatArea">
+            <div class="msg sys">📡 Start: wacht tot je verbonden bent met de groep...</div>
+        </div>
+
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Typ een groepsbericht..." disabled>
+            <button id="sendBtn" disabled>📨 Stuur</button>
+        </div>
+        <div class="status" id="statusText">⏳ Genereer ID...</div>
     </div>
 
     <script>
-        // --- Pop-up logic ---
-        const modal = document.getElementById('modal');
-        const openBtn = document.getElementById('openBtn');
-        const closeBtn = document.querySelector('.close');
+        // --- 1. KAART (LEAFLET) ---
+        const map = L.map('map').setView([49.8940, 2.3022], 17);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap',
+            maxZoom: 19
+        }).addTo(map);
 
-        openBtn.onclick = () => { modal.classList.add('active'); initPeer(); };
-        closeBtn.onclick = () => { modal.classList.remove('active'); };
-        window.onclick = (e) => { if (e.target === modal) modal.classList.remove('active'); };
+        // Marker met popup (tekst over crypte & labyrint)
+        const marker = L.marker([49.8940, 2.3022]).addTo(map);
+        marker.bindPopup(`
+            <div style="max-width:280px;">
+                <h3>🏛️ Notre Dame van Amiens</h3>
+                <p><strong>Adres:</strong> 30 Place Notre Dame, 80000 Amiens</p>
+                <hr>
+                <h4>Over de crypte:</h4>
+                <p>Ja, die is te bezoeken, maar <strong>niet vrij toegankelijk</strong>. De Romaanse crypte (11e eeuw) ligt onder het koor en is het enige restant van de vorige kathedraal. Je kunt hem alleen bezichtigen via een <strong>rondleiding</strong> (meestal georganiseerd door het Office de Tourisme).<br>
+                <em>Let op:</em> Check ter plekke de actuele tijden – vaak alleen open in de zomermaanden. De ingang is via de zuidzijde van het koor.</p>
+                
+                <h4>🔎 Het bijzondere plekje:</h4>
+                <p>Zonder twijfel <strong>het labyrint op de vloer van het schip</strong> (midden in de kerk, vlakbij de ingang). Dit zwart-wit marmeren doolhof symboliseert de pelgrimstocht naar het Hemelse Jeruzalem en toont de wiskundige precisie van de 13e-eeuwse bouwmeesters.</p>
+                <p><em>Tip:</em> Het ligt vaak onder de stoelen, maar de kerkwachten kunnen ze voor je wegschuiven als je beleefd vraagt.</p>
+            </div>
+        `);
+        marker.openPopup();
 
-        // --- Walkie Talkie logic (PeerJS) ---
+        // --- 2. GROEPSWALKIE (PEERJS MESH) ---
         let peer = null;
-        let conn = null;
-        let call = null;
         let localStream = null;
-        let remoteStream = null;
-        let isConnected = false;
+        const connections = new Map(); // peerId -> DataConnection
+        const audioElements = new Map(); // peerId -> Audio element
+        let connectedPeers = new Set(); // om dubbele verbindingen te voorkomen
 
         const myIdDisplay = document.getElementById('myIdDisplay');
-        const remoteIdInput = document.getElementById('remoteIdInput');
+        const remoteId1 = document.getElementById('remoteId1');
+        const remoteId2 = document.getElementById('remoteId2');
+        const remoteId3 = document.getElementById('remoteId3');
         const connectBtn = document.getElementById('connectBtn');
         const pttBtn = document.getElementById('pttBtn');
         const chatArea = document.getElementById('chatArea');
@@ -154,7 +134,7 @@
         const sendBtn = document.getElementById('sendBtn');
         const statusText = document.getElementById('statusText');
 
-        function addChatMessage(text, type = 'other') {
+        function addChat(text, type = 'sys') {
             const div = document.createElement('div');
             div.className = `msg ${type}`;
             div.textContent = text;
@@ -162,9 +142,22 @@
             chatArea.scrollTop = chatArea.scrollHeight;
         }
 
-        function initPeer() {
-            if (peer) return; // al geïnitialiseerd
+        function updateStatus(text) { statusText.textContent = text; }
 
+        // Microfoon initialiseren (staat standaard UIT)
+        navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+            .then(stream => {
+                localStream = stream;
+                localStream.getAudioTracks()[0].enabled = false; // mute standaard
+                updateStatus('✅ Microfoon gereed. Wacht op ID...');
+            })
+            .catch(err => {
+                addChat(`❌ Geen microfoon toegang: ${err.message}`, 'sys');
+                updateStatus('⚠️ Geen audio mogelijk zonder microfoon.');
+            });
+
+        // Peer initialiseren
+        function initPeer() {
             peer = new Peer(null, {
                 debug: 2,
                 config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
@@ -172,161 +165,161 @@
 
             peer.on('open', (id) => {
                 myIdDisplay.textContent = id;
-                statusText.textContent = '✅ Jouw code is actief. Deel deze met je partner.';
-                addChatMessage(`🔑 Jouw ID: ${id}`, 'system');
+                updateStatus('✅ ID actief. Deel deze code met de groep (max 3 anderen).');
+                addChat(`🔑 Jouw ID: ${id}`, 'sys');
             });
 
-            peer.on('connection', (incomingConn) => {
-                conn = incomingConn;
-                conn.on('data', (data) => {
-                    addChatMessage(`📨 Ander: ${data}`, 'other');
-                });
-                conn.on('open', () => {
-                    isConnected = true;
-                    enableControls(true);
-                    addChatMessage('🔗 Ander heeft verbinding gemaakt!', 'system');
-                    statusText.textContent = '🟢 Verbonden met gesprekspartner.';
-                });
-                conn.on('close', () => {
-                    isConnected = false;
-                    enableControls(false);
-                    addChatMessage('🔌 Verbinding verbroken.', 'system');
-                    statusText.textContent = '⛔ Verbinding verbroken.';
-                });
-            });
-
-            peer.on('call', (incomingCall) => {
-                if (call) {
-                    addChatMessage('⚠️ We krijgen al een gesprek, wacht even...', 'system');
+            // Inkomende data-verbinding (chat)
+            peer.on('connection', (conn) => {
+                const remoteId = conn.peer;
+                if (connectedPeers.has(remoteId)) {
+                    conn.close();
                     return;
                 }
-                // Accepteer de inkomende oproep
-                navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-                    .then(stream => {
-                        localStream = stream;
-                        // Start met de microfoon uit (PTT-principe)
-                        localStream.getAudioTracks()[0].enabled = false;
-                        call = incomingCall;
-                        call.answer(stream);
-                        call.on('stream', (remoteStream) => {
-                            const audioEl = new Audio();
-                            audioEl.srcObject = remoteStream;
-                            audioEl.play();
-                            addChatMessage('🎧 Audioverbinding actief (luisteren)', 'system');
-                        });
-                        call.on('close', () => {
-                            addChatMessage('📴 Audiogesprek beëindigd.', 'system');
-                            call = null;
-                            if (localStream) {
-                                localStream.getTracks().forEach(t => t.stop());
-                                localStream = null;
-                            }
-                        });
-                    })
-                    .catch(err => {
-                        addChatMessage(`❌ Microfoonfout: ${err.message}`, 'system');
-                    });
+                connectedPeers.add(remoteId);
+                connections.set(remoteId, conn);
+                conn.on('data', (data) => addChat(`📨 Ander: ${data}`, 'other'));
+                conn.on('open', () => {
+                    addChat(`🔗 ${remoteId} heeft verbinding gemaakt`, 'sys');
+                    updateConnectedCount();
+                });
+                conn.on('close', () => {
+                    connectedPeers.delete(remoteId);
+                    connections.delete(remoteId);
+                    addChat(`🔌 ${remoteId} is verbroken`, 'sys');
+                    updateConnectedCount();
+                });
+            });
+
+            // Inkomende audio-oproep
+            peer.on('call', (call) => {
+                if (!localStream) {
+                    call.close();
+                    return;
+                }
+                call.answer(localStream);
+                call.on('stream', (remoteStream) => {
+                    const audio = new Audio();
+                    audio.srcObject = remoteStream;
+                    audio.play();
+                    audioElements.set(call.peer, audio);
+                    addChat(`🎧 Audiostream van ${call.peer} actief`, 'sys');
+                });
+                call.on('close', () => {
+                    audioElements.delete(call.peer);
+                    addChat(`📴 Audio van ${call.peer} beëindigd`, 'sys');
+                });
             });
 
             peer.on('error', (err) => {
                 if (err.type === 'unavailable-id') {
-                    // Soms gebeurt dit bij opnieuw laden
                     peer.destroy();
                     peer = null;
                     initPeer();
                     return;
                 }
-                addChatMessage(`⚠️ Fout: ${err.message}`, 'system');
-                statusText.textContent = `❌ Fout: ${err.message}`;
+                addChat(`⚠️ Fout: ${err.message}`, 'sys');
             });
         }
+        initPeer();
 
-        function enableControls(enabled) {
-            pttBtn.disabled = !enabled;
+        // Verbind met 3 anderen (mesh)
+        connectBtn.onclick = () => {
+            if (!localStream) {
+                addChat('❌ Microfoon niet beschikbaar. Herlaad de pagina.', 'sys');
+                return;
+            }
+            const ids = [remoteId1.value.trim(), remoteId2.value.trim(), remoteId3.value.trim()].filter(id => id !== '');
+            if (ids.length === 0) {
+                addChat('❌ Vul minstens 1 code in van een ander groepslid.', 'sys');
+                return;
+            }
+            const myId = myIdDisplay.textContent;
+            if (ids.includes(myId)) {
+                addChat('❌ Je kunt niet met jezelf verbinden.', 'sys');
+                return;
+            }
+
+            connectBtn.disabled = true;
+            addChat(`⏳ Bezig met verbinden naar ${ids.length} groepsleden...`, 'sys');
+
+            ids.forEach(remoteId => {
+                if (connectedPeers.has(remoteId)) {
+                    addChat(`ℹ️ Al verbonden met ${remoteId}`, 'sys');
+                    return;
+                }
+
+                // Data connectie
+                const conn = peer.connect(remoteId, { reliable: true });
+                conn.on('open', () => {
+                    connectedPeers.add(remoteId);
+                    connections.set(remoteId, conn);
+                    addChat(`🔗 Verbonden met ${remoteId}`, 'sys');
+                    updateConnectedCount();
+                });
+                conn.on('data', (data) => addChat(`📨 Ander: ${data}`, 'other'));
+                conn.on('close', () => {
+                    connectedPeers.delete(remoteId);
+                    connections.delete(remoteId);
+                    addChat(`🔌 Verbinding met ${remoteId} verbroken`, 'sys');
+                    updateConnectedCount();
+                });
+
+                // Audio oproep
+                const call = peer.call(remoteId, localStream);
+                call.on('stream', (remoteStream) => {
+                    const audio = new Audio();
+                    audio.srcObject = remoteStream;
+                    audio.play();
+                    audioElements.set(remoteId, audio);
+                    addChat(`🎧 Audio met ${remoteId} actief`, 'sys');
+                });
+                call.on('close', () => {
+                    audioElements.delete(remoteId);
+                    addChat(`📴 Audio met ${remoteId} beëindigd`, 'sys');
+                });
+            });
+
+            setTimeout(() => { connectBtn.disabled = false; }, 1000);
+        };
+
+        // Aantal verbindingen bijwerken
+        function updateConnectedCount() {
+            const count = connectedPeers.size;
+            const enabled = count > 0;
+            pttBtn.disabled = !enabled || !localStream;
             chatInput.disabled = !enabled;
             sendBtn.disabled = !enabled;
             if (enabled) {
-                pttBtn.style.background = '#e94560';
-                chatInput.focus();
+                updateStatus(`🟢 Verbonden met ${count} groepsleden (audio klaar)`);
+                pttBtn.style.background = '#ef4444';
             } else {
-                pttBtn.style.background = '#555';
+                updateStatus('⛔ Nog geen verbindingen');
+                pttBtn.style.background = '#475569';
             }
         }
 
-        // Verbinden met de ander
-        connectBtn.onclick = () => {
-            const remoteId = remoteIdInput.value.trim();
-            if (!remoteId) { addChatMessage('❌ Vul eerst de code van de ander in.', 'system'); return; }
-            if (remoteId === myIdDisplay.textContent) { addChatMessage('❌ Je kunt niet met jezelf verbinden.', 'system'); return; }
-
-            statusText.textContent = '⏳ Verbinding maken...';
-            addChatMessage(`🔗 Verbinden met ${remoteId}...`, 'system');
-
-            // Data verbinding
-            conn = peer.connect(remoteId, { reliable: true });
-            conn.on('open', () => {
-                isConnected = true;
-                enableControls(true);
-                addChatMessage('🔗 Verbinding gemaakt!', 'system');
-                statusText.textContent = '🟢 Verbonden.';
-            });
-            conn.on('data', (data) => {
-                addChatMessage(`📨 Ander: ${data}`, 'other');
-            });
-            conn.on('close', () => {
-                isConnected = false;
-                enableControls(false);
-                addChatMessage('🔌 Verbinding verbroken.', 'system');
-                statusText.textContent = '⛔ Verbinding verbroken.';
-            });
-
-            // Audio call starten
-            navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-                .then(stream => {
-                    localStream = stream;
-                    localStream.getAudioTracks()[0].enabled = false; // start muted
-                    call = peer.call(remoteId, stream);
-                    call.on('stream', (remoteStream) => {
-                        const audioEl = new Audio();
-                        audioEl.srcObject = remoteStream;
-                        audioEl.play();
-                        addChatMessage('🎧 Audiostream actief (luisteren)', 'system');
-                    });
-                    call.on('close', () => {
-                        addChatMessage('📴 Audiogesprek beëindigd.', 'system');
-                        call = null;
-                    });
-                })
-                .catch(err => {
-                    addChatMessage(`❌ Microfoonfout: ${err.message}`, 'system');
-                });
-        };
-
-        // Push-to-talk (PTT)
-        pttBtn.addEventListener('mousedown', (e) => {
-            if (!isConnected || !localStream) return;
+        // Push-to-talk (groepsaudio)
+        pttBtn.addEventListener('mousedown', () => {
+            if (!localStream || connectedPeers.size === 0) return;
             localStream.getAudioTracks()[0].enabled = true;
             pttBtn.textContent = '🔴 AAN HET PRATEN...';
         });
-        pttBtn.addEventListener('mouseup', (e) => {
-            if (localStream) {
-                localStream.getAudioTracks()[0].enabled = false;
-            }
+        pttBtn.addEventListener('mouseup', () => {
+            if (localStream) localStream.getAudioTracks()[0].enabled = false;
             pttBtn.textContent = '🎙️ INGEDRUKT HOUDEN OM TE PRATEN';
         });
-        pttBtn.addEventListener('mouseleave', (e) => {
-            if (localStream) {
-                localStream.getAudioTracks()[0].enabled = false;
-            }
+        pttBtn.addEventListener('mouseleave', () => {
+            if (localStream) localStream.getAudioTracks()[0].enabled = false;
             pttBtn.textContent = '🎙️ INGEDRUKT HOUDEN OM TE PRATEN';
         });
 
-        // Tekst chat verzenden
+        // Groepsbericht versturen
         sendBtn.onclick = () => {
             const msg = chatInput.value.trim();
-            if (!msg || !isConnected) return;
-            conn.send(msg);
-            addChatMessage(`👤 Jij: ${msg}`, 'me');
+            if (!msg || connectedPeers.size === 0) return;
+            connections.forEach((conn) => conn.send(msg));
+            addChat(`👤 Jij: ${msg}`, 'me');
             chatInput.value = '';
         };
         chatInput.addEventListener('keypress', (e) => {
